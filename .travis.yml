@@ -15,8 +15,8 @@ android:
     - extra-android-m2repository
 jdk:
   - oraclejdk8
-before_install:
-  - chmod +x gradlew
+#before_install:
+#  - chmod +x gradlew
 # Emulator Management: Create, Start and Wait
 before_script:
   - echo no | android create avd --force -n test -t android-$EMULATOR_API --abi armeabi-v7a
