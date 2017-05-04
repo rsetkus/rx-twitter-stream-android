@@ -10,7 +10,7 @@ jdk:
   - oraclejdk8
 script:
   - cd RxTwitter
-  - ./gradlew test
+  - ./gradlew --info test connectedCheck
 before_cache:
   - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
 cache:
