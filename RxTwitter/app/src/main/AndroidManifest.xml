@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 
-    package="thing.thejvm.uk.co.rxtwitter">
+    package="co.uk.thejvm.thingrxtwitter">
 
     <application
         android:allowBackup="true"
