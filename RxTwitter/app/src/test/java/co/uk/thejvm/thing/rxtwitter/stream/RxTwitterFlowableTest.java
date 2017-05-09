@@ -1,5 +1,6 @@
 package co.uk.thejvm.thing.rxtwitter.stream;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -17,6 +18,11 @@ public class RxTwitterFlowableTest {
     private TwitterStream mockTwitterStream;
 
     private RxTwitterFlowable rxTwitterFlowable;
+
+    @Before
+    public void setUp() {
+        rxTwitterFlowable = new RxTwitterFlowable(mockTwitterStream);
+    }
 
     @Test
     public void whenSubscribedShouldAddListener() {
