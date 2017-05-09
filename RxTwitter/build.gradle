@@ -41,4 +41,5 @@ ext {
     espressoVersion = '2.2.2'
     daggerVersion = '2.7'
     dexmakerVersion = '1.2'
+    twitter4jVersion = '4.0.4'
 }

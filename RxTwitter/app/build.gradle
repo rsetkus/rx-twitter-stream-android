@@ -28,6 +28,9 @@ android {
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
+    lintOptions {
+        disable 'InvalidPackage'
+    }
 }
 
 dependencies {
@@ -42,6 +45,8 @@ dependencies {
     compile "io.reactivex.rxjava2:rxjava:$rootProject.rxjavaVersion"
     compile "io.reactivex.rxjava2:rxandroid:$rootProject.rxandroidVersion"
     compile "org.jetbrains.kotlin:kotlin-stdlib:$rootProject.kotlinVersion"
+    compile "org.twitter4j:twitter4j-core:$rootProject.twitter4jVersion"
+    compile "org.twitter4j:twitter4j-stream:$rootProject.twitter4jVersion"
 
     // Dagger dependencies
     apt "com.google.dagger:dagger-compiler:$rootProject.daggerVersion"
