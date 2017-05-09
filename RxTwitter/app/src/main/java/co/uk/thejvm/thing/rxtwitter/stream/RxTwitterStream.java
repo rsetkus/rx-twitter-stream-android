@@ -12,8 +12,8 @@ public class RxTwitterStream {
         this.twitterStream = twitterStream;
     }
 
-    public RxTwitterFlowable bind(List<String> terrms) {
-        twitterStream.filter(terrms.toArray(new String[terrms.size()]));
-        return new RxTwitterFlowable(twitterStream);
+    public RxTwitterObservable bind(List<String> terms) {
+        twitterStream.filter(terms.toArray(new String[terms.size()]));
+        return new RxTwitterObservable(twitterStream);
     }
 }

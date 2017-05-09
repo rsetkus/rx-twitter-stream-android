@@ -17,15 +17,15 @@ public class RxTwitterFlowableTest {
     @Mock
     private TwitterStream mockTwitterStream;
 
-    private RxTwitterFlowable rxTwitterFlowable;
+    private RxTwitterObservable rxTwitterObservable;
 
     @Before
     public void setUp() {
-        rxTwitterFlowable = new RxTwitterFlowable(mockTwitterStream);
+        rxTwitterObservable = new RxTwitterObservable(mockTwitterStream);
     }
 
     @Test
     public void whenSubscribedShouldAddListener() {
-        rxTwitterFlowable.subscribeActual(mock(Subscriber.class));
+        rxTwitterObservable.subscribeActual(mock(Subscriber.class));
     }
 }
