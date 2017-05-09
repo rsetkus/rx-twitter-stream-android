@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.reactivestreams.Subscriber;
 
+import io.reactivex.Observer;
 import twitter4j.TwitterStream;
 
 import static org.mockito.Mockito.mock;
@@ -26,6 +27,6 @@ public class RxTwitterFlowableTest {
 
     @Test
     public void whenSubscribedShouldAddListener() {
-        rxTwitterObservable.subscribeActual(mock(Subscriber.class));
+        rxTwitterObservable.subscribeActual(mock(Observer.class));
     }
 }

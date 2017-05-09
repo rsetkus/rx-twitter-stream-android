@@ -1,4 +1,4 @@
-package co.uk.thejvm.thing.rxtwitter.common;
+package co.uk.thejvm.thing.rxtwitter;
 
 import android.app.Application;
 
