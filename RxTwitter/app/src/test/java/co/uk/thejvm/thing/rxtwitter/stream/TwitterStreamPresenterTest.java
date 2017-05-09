@@ -12,9 +12,12 @@ import java.util.List;
 
 import co.uk.thejvm.thing.rxtwitter.data.Tweet;
 import co.uk.thejvm.thing.rxtwitter.tweets.TweetsRepository;
+import io.reactivex.Observable;
 
+import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TwitterStreamPresenterTest {
@@ -33,9 +36,16 @@ public class TwitterStreamPresenterTest {
     @Test
     public void whenConnectedToStreamShouldRenderTweet() {
         List<String> terms = Lists.newArrayList("rxjava");
+        when(mockTweetsRepository.getTweets(terms)).thenReturn(Observable.just(new Tweet("#android-rxjava")));
         twitterStreamPresenter.connectToStream(terms);
 
         verify(mockTweetsRepository).getTweets(terms);
         verify(mockTwitterStreamView).renderTweet(any(Tweet.class));
+    }
+
+    @Test
+    public void whenPausedShouldBeDisposed() {
+        twitterStreamPresenter.onPause();
+        assertTrue(twitterStreamPresenter.disposable.isDisposed());
     }
 }

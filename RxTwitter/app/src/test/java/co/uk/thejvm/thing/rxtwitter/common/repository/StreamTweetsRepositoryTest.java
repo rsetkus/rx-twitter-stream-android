@@ -18,7 +18,7 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class StreamTweetsRepositoryTest {
 
-    @Mock TwitterStream twitterStream;
+    @Mock private TwitterStream twitterStream;
 
     private StreamTweetsRepository streamTweetsRepository;
 
