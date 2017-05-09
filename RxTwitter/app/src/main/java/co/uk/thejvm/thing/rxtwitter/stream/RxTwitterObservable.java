@@ -28,7 +28,7 @@ public class RxTwitterObservable extends Observable<Tweet> {
         twitterStream.addListener(rxStatusListener);
     }
 
-    static class RxStatusListener implements StatusListener, Disposable {
+    public static class RxStatusListener implements StatusListener, Disposable {
 
         private AtomicBoolean isDisposed = new AtomicBoolean(false);
         private final TwitterStream twitterStream;
@@ -46,8 +46,9 @@ public class RxTwitterObservable extends Observable<Tweet> {
 
         @Override
         public void dispose() {
-            isDisposed.set(true);
-            twitterStream.removeListener(this);
+            if (isDisposed.compareAndSet(false, true)) {
+                twitterStream.removeListener(this);
+            }
         }
 
         @Override
@@ -62,22 +63,18 @@ public class RxTwitterObservable extends Observable<Tweet> {
 
         @Override
         public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {
-
         }
 
         @Override
         public void onTrackLimitationNotice(int numberOfLimitedStatuses) {
-
         }
 
         @Override
         public void onScrubGeo(long userId, long upToStatusId) {
-
         }
 
         @Override
         public void onStallWarning(StallWarning warning) {
-
         }
     }
 }

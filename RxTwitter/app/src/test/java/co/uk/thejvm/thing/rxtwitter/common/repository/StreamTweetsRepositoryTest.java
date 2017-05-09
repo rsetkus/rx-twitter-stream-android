@@ -10,6 +10,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.List;
 
+import co.uk.thejvm.thing.rxtwitter.tweets.StreamTweetsRepository;
 import twitter4j.TwitterStream;
 
 import static org.mockito.Mockito.verify;
