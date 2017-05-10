@@ -2,8 +2,6 @@ package co.uk.thejvm.thing.rxtwitter.stream;
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import co.uk.thejvm.thing.rxtwitter.common.BasePresenter;
 import co.uk.thejvm.thing.rxtwitter.data.Tweet;
 import co.uk.thejvm.thing.rxtwitter.tweets.TweetsRepository;
@@ -17,7 +15,6 @@ public class TwitterStreamPresenter extends BasePresenter<TwitterStreamView> {
     private final TweetsRepository tweetsRepository;
     protected Disposable disposable = Disposables.empty();
 
-    @Inject
     public TwitterStreamPresenter(TweetsRepository tweetsRepository) {
         this.tweetsRepository = tweetsRepository;
     }

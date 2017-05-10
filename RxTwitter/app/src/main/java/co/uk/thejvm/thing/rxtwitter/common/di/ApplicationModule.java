@@ -23,19 +23,21 @@ public class ApplicationModule {
         this.application = application;
     }
 
+
     @Provides
+    @PerApp
     public Context provideContext() {
         return application.getApplicationContext();
     }
 
     @Provides
-    @Singleton
+    @PerApp
     public SecretsStorage provideSecretsStorage() {
         return new HardCodedSecretsStorage();
     }
 
-    @Singleton
     @Provides
+    @PerApp
     public Configuration provideConfiguration(SecretsStorage secretsStorage) {
         return new ConfigurationBuilder()
                 .setDebugEnabled(true)
@@ -47,7 +49,7 @@ public class ApplicationModule {
     }
 
     @Provides
-    @Singleton
+    @PerApp
     public TwitterStream provideTwitterStream(Configuration configuration) {
         return new TwitterStreamFactory(configuration).getInstance();
     }

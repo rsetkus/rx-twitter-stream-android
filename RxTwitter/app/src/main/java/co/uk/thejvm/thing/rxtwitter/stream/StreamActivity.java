@@ -36,4 +36,9 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
     public void renderTweet(Tweet tweet) {
 
     }
+
+    @Override
+    protected void setUpDependencies() {
+        getActivityComponent().inject(this);
+    }
 }
