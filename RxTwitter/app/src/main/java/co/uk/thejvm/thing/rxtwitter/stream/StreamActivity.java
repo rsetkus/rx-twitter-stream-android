@@ -21,10 +21,13 @@ import co.uk.thejvm.thing.rxtwitter.data.Tweet;
 
 public class StreamActivity extends BaseActivity implements TwitterStreamView {
 
+    private static final String TAG = "StreamActivity";
+
     private RecyclerView liveTweets;
     private TweetsAdapter tweetsAdapter = new TweetsAdapter();
 
     private static final List<String> TERMS = Lists.newArrayList("android");
+    private static final int RECENT_TWEET_POSITION = 0;
 
     @Inject
     TwitterStreamPresenter twitterStreamPresenter;
@@ -41,13 +44,12 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
         liveTweets.setAdapter(tweetsAdapter);
 
         twitterStreamPresenter.setView(this);
-        twitterStreamPresenter.connectToStream(TERMS);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
+        twitterStreamPresenter.connectToStream(TERMS);
     }
 
     @Override
@@ -63,6 +65,7 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
     @Override
     public void renderTweet(Tweet tweet) {
         tweetsAdapter.insertNewTweet(tweet);
+        liveTweets.smoothScrollToPosition(RECENT_TWEET_POSITION);
     }
 
     @Override
@@ -91,8 +94,8 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
         }
 
         public void insertNewTweet(Tweet tweet) {
-            tweets.add(0, tweet);
-            notifyItemInserted(0);
+            tweets.add(RECENT_TWEET_POSITION, tweet);
+            notifyItemInserted(RECENT_TWEET_POSITION);
         }
     }
 
