@@ -6,14 +6,10 @@ import android.os.Handler;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.google.common.collect.Lists;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-
-import java.util.List;
 
 import co.uk.thejvm.thing.rxtwitter.BaseActivityRule;
 import co.uk.thejvm.thing.rxtwitter.RxTwitterApplication;
@@ -28,6 +24,7 @@ import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -41,7 +38,6 @@ public class StreamActivityTest {
     private static final boolean LAUNCH_ACTIVITY = false;
     private Context context = InstrumentationRegistry.getTargetContext();
 
-    private List<String> fakeTerms = Lists.newArrayList("RxJava");
     private Tweet fakeTweet = new Tweet("go reactive or go home");
 
     @Rule
@@ -70,19 +66,17 @@ public class StreamActivityTest {
      */
     @Test
     public void whenTweeReceived_ShouldRenderOnRecyclerView() {
-        ResultRobot resultRobot = new StreamTweetActivityRobot().launchActivity(fakeTerms).verify();
+        ResultRobot resultRobot = new StreamTweetActivityRobot().launchActivity().verify();
         resultRobot.checkIfTweetTextIsVisibleOnScreen();
     }
 
     private class StreamTweetActivityRobot {
-        private List<String> terms;
 
         public ResultRobot verify() {
             return new ResultRobot();
         }
 
-        public StreamTweetActivityRobot launchActivity(List<String> terms) {
-            this.terms = terms;
+        public StreamTweetActivityRobot launchActivity() {
 
             captureView();
             stubStream();
@@ -93,8 +87,7 @@ public class StreamActivityTest {
         }
 
         private void captureView() {
-            BasePresenter<TwitterStreamView> presenter = mockTwitterStreamPresenter;
-            doNothing().when(presenter).setView(viewArgumentCaptor.capture());
+            doNothing().when(mockTwitterStreamPresenter).setView(viewArgumentCaptor.capture());
         }
 
         private TwitterStreamView getTwitterStreamView() {
@@ -103,7 +96,7 @@ public class StreamActivityTest {
 
         private void stubStream() {
             doAnswer(invocation -> new Handler().postAtFrontOfQueue(() -> getTwitterStreamView().renderTweet(fakeTweet)))
-                    .when(mockTwitterStreamPresenter).connectToStream(terms);
+                    .when(mockTwitterStreamPresenter).connectToStream(any());
         }
     }
 

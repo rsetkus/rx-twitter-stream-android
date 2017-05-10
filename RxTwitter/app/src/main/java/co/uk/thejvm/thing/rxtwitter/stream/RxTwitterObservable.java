@@ -1,5 +1,7 @@
 package co.uk.thejvm.thing.rxtwitter.stream;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import co.uk.thejvm.thing.rxtwitter.data.Tweet;
@@ -15,9 +17,11 @@ import twitter4j.TwitterStream;
 public class RxTwitterObservable extends Observable<Tweet> {
 
     private final TwitterStream twitterStream;
+    private final List<String> terms;
 
-    public RxTwitterObservable(TwitterStream twitterStream) {
+    private RxTwitterObservable(TwitterStream twitterStream, List<String> terms) {
         this.twitterStream = twitterStream;
+        this.terms = terms;
     }
 
     @Override
@@ -26,9 +30,10 @@ public class RxTwitterObservable extends Observable<Tweet> {
 
         observer.onSubscribe(rxStatusListener);
         twitterStream.addListener(rxStatusListener);
+        twitterStream.filter(terms.toArray(new String[terms.size()]));
     }
 
-    public static class RxStatusListener implements StatusListener, Disposable {
+    protected static class RxStatusListener implements StatusListener, Disposable {
 
         private AtomicBoolean isDisposed = new AtomicBoolean(false);
         private final TwitterStream twitterStream;
@@ -75,6 +80,25 @@ public class RxTwitterObservable extends Observable<Tweet> {
 
         @Override
         public void onStallWarning(StallWarning warning) {
+        }
+    }
+
+    public static class Builder {
+        private TwitterStream twitterStream;
+        private List<String> terms = Collections.EMPTY_LIST;
+
+        public Builder setTwitterStream(TwitterStream twitterStream) {
+            this.twitterStream = twitterStream;
+            return this;
+        }
+
+        public Builder setTerms(List<String> terms) {
+            this.terms = terms;
+            return this;
+        }
+
+        public RxTwitterObservable build() {
+            return new RxTwitterObservable(twitterStream, terms);
         }
     }
 }

@@ -10,8 +10,9 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.disposables.Disposables;
 import io.reactivex.observers.DisposableObserver;
 
-public class TwitterStreamPresenter extends BasePresenter<TwitterStreamView> {
+public class TwitterStreamPresenter implements BasePresenter<TwitterStreamView> {
 
+    private TwitterStreamView twitterStreamView;
     private final TweetsRepository tweetsRepository;
     protected Disposable disposable = Disposables.empty();
 
@@ -25,6 +26,11 @@ public class TwitterStreamPresenter extends BasePresenter<TwitterStreamView> {
     }
 
     @Override
+    public void setView(TwitterStreamView view) {
+        this.twitterStreamView = view;
+    }
+
+    @Override
     public void onPause() {
         disposable.dispose();
     }
@@ -33,7 +39,7 @@ public class TwitterStreamPresenter extends BasePresenter<TwitterStreamView> {
 
         @Override
         public void onNext(@NonNull Tweet tweet) {
-            view.renderTweet(tweet);
+            twitterStreamView.renderTweet(tweet);
         }
 
         @Override

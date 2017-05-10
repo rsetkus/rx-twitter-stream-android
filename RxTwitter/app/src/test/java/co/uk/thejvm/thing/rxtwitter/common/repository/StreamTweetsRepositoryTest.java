@@ -30,7 +30,7 @@ public class StreamTweetsRepositoryTest {
     @Test
     public void whenStartsListeningShouldFilterByTerms() {
         List<String> terms = Lists.newArrayList("android", "rxjava");
-        streamTweetsRepository.getTweets(terms);
+        streamTweetsRepository.getTweets(terms).subscribe();
         verify(twitterStream).filter(terms.toArray(new String[terms.size()]));
     }
 

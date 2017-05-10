@@ -18,7 +18,6 @@ public class StreamTweetsRepository implements TweetsRepository {
 
     @Override
     public Observable<Tweet> getTweets(@NonNull List<String> terms) {
-        twitterStream.filter(terms.toArray(new String[terms.size()]));
-        return new RxTwitterObservable(twitterStream);
+        return new RxTwitterObservable.Builder().setTerms(terms).setTwitterStream(twitterStream).build();
     }
 }
