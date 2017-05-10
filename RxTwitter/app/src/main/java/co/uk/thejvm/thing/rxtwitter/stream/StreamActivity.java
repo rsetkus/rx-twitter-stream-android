@@ -2,18 +2,14 @@ package co.uk.thejvm.thing.rxtwitter.stream;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 
 import javax.inject.Inject;
 
-import co.uk.thejvm.thing.rxtwitter.RxTwitterApplication;
-import co.uk.thejvm.thing.rxtwitter.common.di.ActivityComponent;
-import co.uk.thejvm.thing.rxtwitter.common.di.ActivityModule;
-import co.uk.thejvm.thing.rxtwitter.common.di.DaggerActivityComponent;
-import co.uk.thejvm.thingrxtwitter.R;
+import co.uk.thejvm.thing.rxtwitter.BaseActivity;
+import co.uk.thejvm.thing.rxtwitter.R;
+import co.uk.thejvm.thing.rxtwitter.data.Tweet;
 
-
-public class StreamActivity extends AppCompatActivity {
+public class StreamActivity extends BaseActivity implements TwitterStreamView {
 
     @Inject
     TwitterStreamPresenter twitterStreamPresenter;
@@ -23,15 +19,21 @@ public class StreamActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        inject();
+        twitterStreamPresenter.setView(this);
     }
 
-    private void inject() {
-        ActivityComponent activityComponent = DaggerActivityComponent.builder()
-                .applicationComponent(((RxTwitterApplication)getApplication()).getApplicationComponent())
-                .activityModule(new ActivityModule())
-                .build();
+    @Override
+    public void showLoading() {
 
-        activityComponent.inject(this);
+    }
+
+    @Override
+    public void hideLoading() {
+
+    }
+
+    @Override
+    public void renderTweet(Tweet tweet) {
+
     }
 }

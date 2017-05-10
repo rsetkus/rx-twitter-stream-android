@@ -1,5 +1,6 @@
 package co.uk.thejvm.thing.rxtwitter.common.di;
 
+import android.app.Application;
 import android.content.Context;
 
 import javax.inject.Singleton;
@@ -16,15 +17,15 @@ import twitter4j.conf.ConfigurationBuilder;
 @Module
 public class ApplicationModule {
 
-    private final Context context;
+    private final Application application;
 
-    public ApplicationModule(Context context) {
-        this.context = context;
+    public ApplicationModule(Application application) {
+        this.application = application;
     }
 
     @Provides
     public Context provideContext() {
-        return context;
+        return application.getApplicationContext();
     }
 
     @Provides

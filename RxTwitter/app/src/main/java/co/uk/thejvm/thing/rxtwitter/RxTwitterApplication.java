@@ -18,4 +18,8 @@ public class RxTwitterApplication extends Application {
     public ApplicationComponent getApplicationComponent() {
         return applicationComponent;
     }
+
+    protected void setApplicationComponent(ApplicationComponent applicationComponent) {
+        this.applicationComponent = applicationComponent;
+    }
 }
