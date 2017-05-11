@@ -38,7 +38,7 @@ public class StreamActivityTest {
     private static final boolean LAUNCH_ACTIVITY = false;
     private Context context = InstrumentationRegistry.getTargetContext();
 
-    private Tweet fakeTweet = new Tweet("go reactive or go home");
+    private Tweet fakeTweet = new Tweet("go reactive or go home", "2017.05.11 21:00");
 
     @Rule
     public BaseActivityRule<StreamActivity> activityTestRule =
@@ -72,6 +72,7 @@ public class StreamActivityTest {
     public void whenTweeReceived_ShouldRenderOnRecyclerView() {
         ResultRobot resultRobot = new StreamTweetActivityRobot().launchActivity().verify();
         resultRobot.checkIfTweetTextIsVisibleOnScreen();
+        resultRobot.checkIfTweetDateIsVisible();
     }
 
     private class StreamTweetActivityRobot {
@@ -108,6 +109,10 @@ public class StreamActivityTest {
 
         public void checkIfTweetTextIsVisibleOnScreen() {
             onView(withText(fakeTweet.getContent())).check(matches(isDisplayed()));
+        }
+
+        public void checkIfTweetDateIsVisible() {
+            onView(withText(fakeTweet.getDateLabel())).check(matches(isDisplayed()));
         }
     }
 }

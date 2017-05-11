@@ -3,6 +3,8 @@ package co.uk.thejvm.thing.rxtwitter.common.di;
 import android.app.Activity;
 
 import co.uk.thejvm.thing.rxtwitter.BaseActivity;
+import co.uk.thejvm.thing.rxtwitter.common.util.SimpleTwitterMapper;
+import co.uk.thejvm.thing.rxtwitter.common.util.TwitterMapper;
 import co.uk.thejvm.thing.rxtwitter.stream.TwitterStreamPresenter;
 import co.uk.thejvm.thing.rxtwitter.tweets.StreamTweetsRepository;
 import co.uk.thejvm.thing.rxtwitter.tweets.TweetsRepository;
@@ -21,8 +23,14 @@ public class ActivityModule {
 
     @ActivityScope
     @Provides
-    public TweetsRepository provideTweetsRepository(TwitterStream twitterStream) {
-        return new StreamTweetsRepository(twitterStream);
+    public TwitterMapper provideTwitterMapper() {
+        return new SimpleTwitterMapper();
+    }
+
+    @ActivityScope
+    @Provides
+    public TweetsRepository provideTweetsRepository(TwitterStream twitterStream, TwitterMapper twitterMapper) {
+        return new StreamTweetsRepository(twitterStream, twitterMapper);
     }
 
     @ActivityScope

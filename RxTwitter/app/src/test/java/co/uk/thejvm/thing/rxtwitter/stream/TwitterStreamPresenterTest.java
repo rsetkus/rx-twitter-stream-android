@@ -36,7 +36,7 @@ public class TwitterStreamPresenterTest {
     @Test
     public void whenConnectedToStreamShouldRenderTweet() {
         List<String> terms = Lists.newArrayList("rxjava");
-        when(mockTweetsRepository.getTweets(terms)).thenReturn(Observable.just(new Tweet("#android-rxjava")));
+        when(mockTweetsRepository.getTweets(terms)).thenReturn(Observable.just(new Tweet("#android-rxjava", "2017.05.11 21:55")));
         twitterStreamPresenter.connectToStream(terms);
 
         verify(mockTweetsRepository).getTweets(terms);

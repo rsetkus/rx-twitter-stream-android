@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import co.uk.thejvm.thing.rxtwitter.common.util.TwitterMapper;
 import co.uk.thejvm.thing.rxtwitter.data.Tweet;
 import io.reactivex.Observable;
 import io.reactivex.Observer;
@@ -18,10 +19,12 @@ public class RxTwitterObservable extends Observable<Tweet> {
 
     private final TwitterStream twitterStream;
     private final List<String> terms;
+    private final TwitterMapper twitterMapper;
 
-    private RxTwitterObservable(TwitterStream twitterStream, List<String> terms) {
+    private RxTwitterObservable(TwitterStream twitterStream, List<String> terms, TwitterMapper twitterMapper) {
         this.twitterStream = twitterStream;
         this.terms = terms;
+        this.twitterMapper = twitterMapper;
     }
 
     @Override
@@ -33,7 +36,7 @@ public class RxTwitterObservable extends Observable<Tweet> {
         twitterStream.filter(terms.toArray(new String[terms.size()]));
     }
 
-    protected static class RxStatusListener implements StatusListener, Disposable {
+    protected class RxStatusListener implements StatusListener, Disposable {
 
         private AtomicBoolean isDisposed = new AtomicBoolean(false);
         private final TwitterStream twitterStream;
@@ -63,7 +66,7 @@ public class RxTwitterObservable extends Observable<Tweet> {
 
         @Override
         public void onStatus(Status status) {
-            observer.onNext(new Tweet(status.getText()));
+            observer.onNext(twitterMapper.from(status));
         }
 
         @Override
@@ -86,6 +89,7 @@ public class RxTwitterObservable extends Observable<Tweet> {
     public static class Builder {
         private TwitterStream twitterStream;
         private List<String> terms = Collections.EMPTY_LIST;
+        private TwitterMapper twitterMapper;
 
         public Builder setTwitterStream(TwitterStream twitterStream) {
             this.twitterStream = twitterStream;
@@ -97,8 +101,13 @@ public class RxTwitterObservable extends Observable<Tweet> {
             return this;
         }
 
+        public Builder setTwitterMapper(TwitterMapper twitterMapper) {
+            this.twitterMapper = twitterMapper;
+            return this;
+        }
+
         public RxTwitterObservable build() {
-            return new RxTwitterObservable(twitterStream, terms);
+            return new RxTwitterObservable(twitterStream, terms, twitterMapper);
         }
     }
 }

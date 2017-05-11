@@ -102,15 +102,18 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
     private class TweetViewHolder extends RecyclerView.ViewHolder {
 
         private TextView tweetContent;
+        private TextView tweetCreatedDateLabel;
 
         public TweetViewHolder(View itemView) {
             super(itemView);
 
             tweetContent = (TextView) itemView.findViewById(R.id.tweet_content);
+            tweetCreatedDateLabel = (TextView) itemView.findViewById(R.id.tweet_created_date_label);
         }
 
         public void setTweet(Tweet tweet) {
             tweetContent.setText(tweet.getContent());
+            tweetCreatedDateLabel.setText(tweet.getDateLabel());
         }
     }
 }
