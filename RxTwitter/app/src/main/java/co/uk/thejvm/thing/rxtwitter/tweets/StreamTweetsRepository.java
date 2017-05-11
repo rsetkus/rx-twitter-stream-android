@@ -2,8 +2,7 @@ package co.uk.thejvm.thing.rxtwitter.tweets;
 
 import java.util.List;
 
-import javax.inject.Inject;
-
+import co.uk.thejvm.thing.rxtwitter.common.util.TwitterMapper;
 import co.uk.thejvm.thing.rxtwitter.data.Tweet;
 import co.uk.thejvm.thing.rxtwitter.stream.RxTwitterObservable;
 import io.reactivex.Observable;
@@ -13,15 +12,19 @@ import twitter4j.TwitterStream;
 public class StreamTweetsRepository implements TweetsRepository {
 
     private final TwitterStream twitterStream;
+    private final TwitterMapper twitterMapper;
 
-    @Inject
-    public StreamTweetsRepository(TwitterStream twitterStream) {
+    public StreamTweetsRepository(TwitterStream twitterStream, TwitterMapper twitterMapper) {
         this.twitterStream = twitterStream;
+        this.twitterMapper = twitterMapper;
     }
 
     @Override
     public Observable<Tweet> getTweets(@NonNull List<String> terms) {
-        twitterStream.filter(terms.toArray(new String[terms.size()]));
-        return new RxTwitterObservable(twitterStream);
+        return new RxTwitterObservable.Builder()
+                .setTerms(terms)
+                .setTwitterStream(twitterStream)
+                .setTwitterMapper(twitterMapper)
+                .build();
     }
 }

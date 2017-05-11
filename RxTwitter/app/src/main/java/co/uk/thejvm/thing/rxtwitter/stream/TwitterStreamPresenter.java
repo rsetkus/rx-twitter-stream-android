@@ -2,8 +2,6 @@ package co.uk.thejvm.thing.rxtwitter.stream;
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import co.uk.thejvm.thing.rxtwitter.common.BasePresenter;
 import co.uk.thejvm.thing.rxtwitter.data.Tweet;
 import co.uk.thejvm.thing.rxtwitter.tweets.TweetsRepository;
@@ -12,12 +10,12 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.disposables.Disposables;
 import io.reactivex.observers.DisposableObserver;
 
-public class TwitterStreamPresenter extends BasePresenter<TwitterStreamView> {
+public class TwitterStreamPresenter implements BasePresenter<TwitterStreamView> {
 
+    private TwitterStreamView twitterStreamView;
     private final TweetsRepository tweetsRepository;
     protected Disposable disposable = Disposables.empty();
 
-    @Inject
     public TwitterStreamPresenter(TweetsRepository tweetsRepository) {
         this.tweetsRepository = tweetsRepository;
     }
@@ -25,6 +23,11 @@ public class TwitterStreamPresenter extends BasePresenter<TwitterStreamView> {
     public void connectToStream(List<String> terms) {
         disposable = tweetsRepository.getTweets(terms)
                 .subscribeWith(new TweetStreamObserver());
+    }
+
+    @Override
+    public void setView(TwitterStreamView view) {
+        this.twitterStreamView = view;
     }
 
     @Override
@@ -36,7 +39,7 @@ public class TwitterStreamPresenter extends BasePresenter<TwitterStreamView> {
 
         @Override
         public void onNext(@NonNull Tweet tweet) {
-            view.renderTweet(tweet);
+            twitterStreamView.renderTweet(tweet);
         }
 
         @Override
