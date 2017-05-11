@@ -3,8 +3,6 @@ package co.uk.thejvm.thing.rxtwitter.common.di;
 import android.app.Application;
 import android.content.Context;
 
-import javax.inject.Singleton;
-
 import co.uk.thejvm.thing.rxtwitter.common.repository.HardCodedSecretsStorage;
 import co.uk.thejvm.thing.rxtwitter.common.repository.SecretsStorage;
 import dagger.Module;
@@ -23,7 +21,6 @@ public class ApplicationModule {
         this.application = application;
     }
 
-
     @Provides
     @PerApp
     public Context provideContext() {
@@ -40,17 +37,23 @@ public class ApplicationModule {
     @PerApp
     public Configuration provideConfiguration(SecretsStorage secretsStorage) {
         return new ConfigurationBuilder()
-                .setDebugEnabled(true)
-                .setOAuthConsumerKey(secretsStorage.getConsumerKey())
-                .setOAuthConsumerSecret(secretsStorage.getConsumerSecret())
-                .setOAuthAccessToken(secretsStorage.getToken())
-                .setOAuthAccessTokenSecret(secretsStorage.getTokenSecret())
-                .build();
+            .setDebugEnabled(true)
+            .setOAuthConsumerKey(secretsStorage.getConsumerKey())
+            .setOAuthConsumerSecret(secretsStorage.getConsumerSecret())
+            .setOAuthAccessToken(secretsStorage.getToken())
+            .setOAuthAccessTokenSecret(secretsStorage.getTokenSecret())
+            .build();
     }
 
     @Provides
     @PerApp
     public TwitterStream provideTwitterStream(Configuration configuration) {
         return new TwitterStreamFactory(configuration).getInstance();
+    }
+
+    @Provides
+    @PerApp
+    protected ModuleBootstrapper provideModuleBootstrapper() {
+        return new ModuleBootstrapper();
     }
 }

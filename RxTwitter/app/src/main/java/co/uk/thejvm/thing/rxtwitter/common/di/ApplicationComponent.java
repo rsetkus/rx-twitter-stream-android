@@ -7,4 +7,5 @@ import twitter4j.TwitterStream;
 @Component(modules = ApplicationModule.class)
 public interface ApplicationComponent {
     TwitterStream getTwitterStream();
+    ModuleBootstrapper getModuleBootstrapper();
 }

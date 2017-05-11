@@ -4,6 +4,7 @@ import android.app.Application;
 
 import co.uk.thejvm.thing.rxtwitter.common.di.ActivityModule;
 import co.uk.thejvm.thing.rxtwitter.common.di.ApplicationModule;
+import co.uk.thejvm.thing.rxtwitter.common.di.ModuleBootstrapper;
 
 /**
  * Dagger2 test module used for espresso tests
@@ -14,7 +15,17 @@ public class TestModule extends ApplicationModule {
         super(application);
     }
 
-    protected ActivityModule getActivityModule() {
-        return new ActivityModule();
+    @Override
+    protected ModuleBootstrapper provideModuleBootstrapper() {
+        return new ModuleBootstrapper() {
+            @Override
+            public ActivityModule getNewActivityModule(BaseActivity baseActivity) {
+                return getActivityModule(baseActivity);
+            }
+        };
+    }
+
+    protected ActivityModule getActivityModule(BaseActivity baseActivity) {
+        return new ActivityModule(baseActivity);
     }
 }

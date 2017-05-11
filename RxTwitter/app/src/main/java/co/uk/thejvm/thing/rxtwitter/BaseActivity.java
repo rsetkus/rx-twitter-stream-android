@@ -5,7 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
 import co.uk.thejvm.thing.rxtwitter.common.di.ActivityComponent;
-import co.uk.thejvm.thing.rxtwitter.common.di.ActivityModule;
+import co.uk.thejvm.thing.rxtwitter.common.di.ApplicationComponent;
 import co.uk.thejvm.thing.rxtwitter.common.di.DaggerActivityComponent;
 
 public abstract class BaseActivity extends AppCompatActivity {
@@ -19,9 +19,10 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     private void inject() {
+        ApplicationComponent applicationComponent = ((RxTwitterApplication) getApplicationContext()).getApplicationComponent();
         activityComponent = DaggerActivityComponent.builder()
-                .applicationComponent(((RxTwitterApplication) getApplicationContext()).getApplicationComponent())
-                .activityModule(new ActivityModule())
+                .applicationComponent(applicationComponent)
+                .activityModule(applicationComponent.getModuleBootstrapper().getNewActivityModule(this))
                 .build();
 
         activityComponent.inject(this);

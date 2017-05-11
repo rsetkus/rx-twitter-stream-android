@@ -11,10 +11,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
+import co.uk.thejvm.thing.rxtwitter.BaseActivity;
 import co.uk.thejvm.thing.rxtwitter.BaseActivityRule;
 import co.uk.thejvm.thing.rxtwitter.RxTwitterApplication;
 import co.uk.thejvm.thing.rxtwitter.TestModule;
-import co.uk.thejvm.thing.rxtwitter.common.BasePresenter;
 import co.uk.thejvm.thing.rxtwitter.common.di.ActivityModule;
 import co.uk.thejvm.thing.rxtwitter.common.di.ApplicationModule;
 import co.uk.thejvm.thing.rxtwitter.data.Tweet;
@@ -46,11 +46,15 @@ public class StreamActivityTest {
 
                 @Override
                 public ApplicationModule getApplicationModule() {
+
                     RxTwitterApplication application = (RxTwitterApplication) context.getApplicationContext();
+
                     return new TestModule(application) {
+
                         @Override
-                        protected ActivityModule getActivityModule() {
-                            return new ActivityModule() {
+                        protected ActivityModule getActivityModule(BaseActivity baseActivity) {
+
+                            return new ActivityModule(baseActivity) {
                                 @Override
                                 public TwitterStreamPresenter provideTwitterStreamPresenter(TweetsRepository repository) {
                                     return mockTwitterStreamPresenter;
