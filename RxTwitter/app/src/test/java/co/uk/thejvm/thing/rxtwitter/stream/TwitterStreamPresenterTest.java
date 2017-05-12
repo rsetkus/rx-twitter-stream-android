@@ -46,6 +46,6 @@ public class TwitterStreamPresenterTest {
     @Test
     public void whenPausedShouldBeDisposed() {
         twitterStreamPresenter.onPause();
-        assertTrue(twitterStreamPresenter.disposable.isDisposed());
+        assertTrue(twitterStreamPresenter.isDisposed());
     }
 }

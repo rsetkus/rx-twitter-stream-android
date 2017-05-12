@@ -14,7 +14,7 @@ public class TwitterStreamPresenter implements BasePresenter<TwitterStreamView> 
 
     private TwitterStreamView twitterStreamView;
     private final TweetsRepository tweetsRepository;
-    protected Disposable disposable = Disposables.empty();
+    private Disposable disposable = Disposables.empty();
 
     public TwitterStreamPresenter(TweetsRepository tweetsRepository) {
         this.tweetsRepository = tweetsRepository;
@@ -33,6 +33,15 @@ public class TwitterStreamPresenter implements BasePresenter<TwitterStreamView> 
     @Override
     public void onPause() {
         disposable.dispose();
+    }
+
+    @Override
+    public void dispose() {
+        disposable.dispose();
+    }
+
+    public boolean isDisposed() {
+        return disposable.isDisposed();
     }
 
     private class TweetStreamObserver extends DisposableObserver<Tweet> {
