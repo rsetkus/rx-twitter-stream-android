@@ -8,7 +8,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -59,12 +58,6 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
         liveTweets.setAdapter(tweetsAdapter);
 
         twitterStreamPresenter.setView(this);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        twitterStreamPresenter.connectToStream(TERMS);
     }
 
     @Override
@@ -171,7 +164,8 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
 
     private void doSearch(String term) {
         tweetsAdapter.clear();
-        Toast.makeText(this, term, Toast.LENGTH_SHORT).show();
+        twitterStreamPresenter.dispose();
+        twitterStreamPresenter.connectToStream(Lists.newArrayList(term));
     }
 
     private void bindViews() {

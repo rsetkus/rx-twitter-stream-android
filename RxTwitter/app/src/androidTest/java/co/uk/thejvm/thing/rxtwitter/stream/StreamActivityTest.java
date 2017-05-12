@@ -33,9 +33,11 @@ import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static co.uk.thejvm.thing.rxtwitter.espresso.CustomMatchers.withRecyclerViewSize;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyList;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 @RunWith(AndroidJUnit4.class)
 public class StreamActivityTest {
@@ -78,21 +80,17 @@ public class StreamActivityTest {
      */
     @Test
     public void whenTweeReceived_ShouldRenderOnRecyclerView() {
-        ResultRobot resultRobot = new StreamTweetActivityRobot().launchActivity().verify();
+        ResultRobot resultRobot = new StreamTweetActivityRobot().launchActivity().performSearch().verify();
         resultRobot.checkIfTweetTextIsVisibleOnScreen();
         resultRobot.checkIfTweetDateIsVisible();
     }
 
     @Test
     public void whenSearchPerformed_ShouldClearTheTweetsList() {
-        StreamTweetActivityRobot streamTweetActivityRobot = new StreamTweetActivityRobot().launchActivity();
+        ResultRobot resultRobot = new StreamTweetActivityRobot().launchActivity().performSearch().verify();
 
-        ResultRobot resultRobot = streamTweetActivityRobot.verify();
         resultRobot.checkSizeOfTweetsList(tweets.size());
-
-        streamTweetActivityRobot.performSearch();
-
-        resultRobot.checkSizeOfTweetsList(0);
+        resultRobot.verifyIfReconectedToStreamByNewTerm();
     }
 
     private class StreamTweetActivityRobot {
@@ -150,6 +148,11 @@ public class StreamActivityTest {
 
         public void checkSizeOfTweetsList(int size) {
             onView(withId(R.id.live_tweets_list)).check(matches(withRecyclerViewSize(size)));
+        }
+
+        public void verifyIfReconectedToStreamByNewTerm() {
+            verify(mockTwitterStreamPresenter).dispose();
+            verify(mockTwitterStreamPresenter).connectToStream(anyList());
         }
     }
 }
