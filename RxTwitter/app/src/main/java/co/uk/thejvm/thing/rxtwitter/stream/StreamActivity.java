@@ -1,13 +1,25 @@
 package co.uk.thejvm.thing.rxtwitter.stream;
 
+import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.common.collect.Lists;
 
@@ -23,6 +35,11 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
 
     private static final String TAG = "StreamActivity";
 
+    private Toolbar toolbar;
+    private boolean isSearchOpened = false;
+    private MenuItem mSearchAction;
+    private EditText termsSearch;
+
     private RecyclerView liveTweets;
     private TweetsAdapter tweetsAdapter = new TweetsAdapter();
 
@@ -35,9 +52,7 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        liveTweets = (RecyclerView) findViewById(R.id.live_tweets_list);
+        bindViews();
 
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
         liveTweets.setLayoutManager(mLayoutManager);
@@ -50,6 +65,41 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
     protected void onResume() {
         super.onResume();
         twitterStreamPresenter.connectToStream(TERMS);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        mSearchAction = menu.findItem(R.id.action_search);
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        switch (id) {
+            case R.id.action_search:
+                handleMenuSearch();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(isSearchOpened) {
+            handleMenuSearch();
+            return;
+        }
+        super.onBackPressed();
     }
 
     @Override
@@ -71,6 +121,68 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
     @Override
     protected void setUpDependencies() {
         getActivityComponent().inject(this);
+    }
+
+    private void handleMenuSearch() {
+        ActionBar supportActionBar = getSupportActionBar();
+
+        if (isSearchOpened){
+            disableSearch(supportActionBar);
+        } else {
+
+            supportActionBar.setDisplayShowCustomEnabled(true);
+            supportActionBar.setCustomView(R.layout.search_bar);
+            supportActionBar.setDisplayShowTitleEnabled(false);
+
+            termsSearch = (EditText)supportActionBar.getCustomView().findViewById(R.id.terms_search);
+
+            termsSearch.setOnEditorActionListener((view, id, event) -> {
+                if (id == EditorInfo.IME_ACTION_SEARCH) {
+                    doSearch(termsSearch.getText().toString());
+                    disableSearch(supportActionBar);
+                    return true;
+                }
+                return false;
+            });
+
+            termsSearch.requestFocus();
+
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+
+            mSearchAction.setIcon(getResources().getDrawable(R.mipmap.ic_clear_white_24dp, null));
+
+            isSearchOpened = true;
+        }
+    }
+
+    private void disableSearch(ActionBar action) {
+        action.setDisplayShowCustomEnabled(false);
+        action.setDisplayShowTitleEnabled(true);
+
+        termsSearch.clearFocus();
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+
+        mSearchAction.setIcon(getResources().getDrawable(R.mipmap.ic_search_white_24dp, null));
+
+        isSearchOpened = false;
+    }
+
+    private void doSearch(String term) {
+        tweetsAdapter.clear();
+        Toast.makeText(this, term, Toast.LENGTH_SHORT).show();
+    }
+
+    private void bindViews() {
+        setContentView(R.layout.activity_main);
+
+        liveTweets = (RecyclerView) findViewById(R.id.live_tweets_list);
+        termsSearch = (EditText) findViewById(R.id.terms_search);
+        toolbar = (Toolbar) findViewById(R.id.rx_twitter_toolbar);
+        setSupportActionBar(toolbar);
+
+        toolbar.setTitleTextColor(Color.WHITE);
     }
 
     private class TweetsAdapter extends RecyclerView.Adapter<TweetViewHolder> {
@@ -96,6 +208,11 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
         public void insertNewTweet(Tweet tweet) {
             tweets.add(RECENT_TWEET_POSITION, tweet);
             notifyItemInserted(RECENT_TWEET_POSITION);
+        }
+
+        public void clear() {
+            tweets.clear();
+            notifyDataSetChanged();
         }
     }
 

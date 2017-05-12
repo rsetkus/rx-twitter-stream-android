@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.espresso.core.deps.guava.collect.Lists;
 import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Rule;
@@ -11,8 +12,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
+import java.util.List;
+
 import co.uk.thejvm.thing.rxtwitter.BaseActivity;
 import co.uk.thejvm.thing.rxtwitter.BaseActivityRule;
+import co.uk.thejvm.thing.rxtwitter.R;
 import co.uk.thejvm.thing.rxtwitter.RxTwitterApplication;
 import co.uk.thejvm.thing.rxtwitter.TestModule;
 import co.uk.thejvm.thing.rxtwitter.common.di.ActivityModule;
@@ -21,9 +25,13 @@ import co.uk.thejvm.thing.rxtwitter.data.Tweet;
 import co.uk.thejvm.thing.rxtwitter.tweets.TweetsRepository;
 
 import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.action.ViewActions.pressImeActionButton;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
+import static co.uk.thejvm.thing.rxtwitter.espresso.CustomMatchers.withRecyclerViewSize;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
@@ -38,7 +46,7 @@ public class StreamActivityTest {
     private static final boolean LAUNCH_ACTIVITY = false;
     private Context context = InstrumentationRegistry.getTargetContext();
 
-    private Tweet fakeTweet = new Tweet("go reactive or go home", "2017.05.11 21:00");
+    private List<Tweet> tweets = Lists.newArrayList(new Tweet("go reactive or go home", "2017.05.11 21:00"));
 
     @Rule
     public BaseActivityRule<StreamActivity> activityTestRule =
@@ -75,6 +83,18 @@ public class StreamActivityTest {
         resultRobot.checkIfTweetDateIsVisible();
     }
 
+    @Test
+    public void whenSearchPerformed_ShouldClearTheTweetsList() {
+        StreamTweetActivityRobot streamTweetActivityRobot = new StreamTweetActivityRobot().launchActivity();
+
+        ResultRobot resultRobot = streamTweetActivityRobot.verify();
+        resultRobot.checkSizeOfTweetsList(tweets.size());
+
+        streamTweetActivityRobot.performSearch();
+
+        resultRobot.checkSizeOfTweetsList(0);
+    }
+
     private class StreamTweetActivityRobot {
 
         public ResultRobot verify() {
@@ -100,19 +120,36 @@ public class StreamActivityTest {
         }
 
         private void stubStream() {
-            doAnswer(invocation -> new Handler().postAtFrontOfQueue(() -> getTwitterStreamView().renderTweet(fakeTweet)))
-                    .when(mockTwitterStreamPresenter).connectToStream(any());
+            doAnswer(invocation -> new Handler().postAtFrontOfQueue(() -> {
+                for (Tweet tweet : tweets) {
+                    getTwitterStreamView().renderTweet(tweet);
+                }
+            })).when(mockTwitterStreamPresenter).connectToStream(any());
+        }
+
+        public StreamTweetActivityRobot performSearch() {
+            onView(withId(R.id.action_search)).perform(click());
+            onView(withId(R.id.terms_search)).perform(pressImeActionButton());
+            return this;
         }
     }
 
     private class ResultRobot {
 
         public void checkIfTweetTextIsVisibleOnScreen() {
-            onView(withText(fakeTweet.getContent())).check(matches(isDisplayed()));
+            for (Tweet tweet : tweets) {
+                onView(withText(tweet.getContent())).check(matches(isDisplayed()));
+            }
         }
 
         public void checkIfTweetDateIsVisible() {
-            onView(withText(fakeTweet.getDateLabel())).check(matches(isDisplayed()));
+            for (Tweet tweet : tweets) {
+                onView(withText(tweet.getDateLabel())).check(matches(isDisplayed()));
+            }
+        }
+
+        public void checkSizeOfTweetsList(int size) {
+            onView(withId(R.id.live_tweets_list)).check(matches(withRecyclerViewSize(size)));
         }
     }
 }
