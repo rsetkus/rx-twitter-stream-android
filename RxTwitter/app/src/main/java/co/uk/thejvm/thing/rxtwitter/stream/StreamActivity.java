@@ -1,6 +1,7 @@
 package co.uk.thejvm.thing.rxtwitter.stream;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -18,7 +19,6 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.common.collect.Lists;
 
@@ -28,25 +28,28 @@ import javax.inject.Inject;
 
 import co.uk.thejvm.thing.rxtwitter.BaseActivity;
 import co.uk.thejvm.thing.rxtwitter.R;
+import co.uk.thejvm.thing.rxtwitter.common.BackPressureStrategy;
 import co.uk.thejvm.thing.rxtwitter.data.Tweet;
 
 public class StreamActivity extends BaseActivity implements TwitterStreamView {
 
     private static final String TAG = "StreamActivity";
 
+    @Inject
+    TwitterStreamPresenter twitterStreamPresenter;
+
+    static final String BACKPRESSURE_STRATEGY_EXTRA_KEY = "backpressure_strategy_option";
     private Toolbar toolbar;
     private boolean isSearchOpened = false;
     private MenuItem mSearchAction;
+
     private EditText termsSearch;
-
     private RecyclerView liveTweets;
+
     private TweetsAdapter tweetsAdapter = new TweetsAdapter();
+    private BackPressureStrategy backPressureStrategy = BackPressureStrategy.NO_STRATEGY;
 
-    private static final List<String> TERMS = Lists.newArrayList("android");
     private static final int RECENT_TWEET_POSITION = 0;
-
-    @Inject
-    TwitterStreamPresenter twitterStreamPresenter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -58,6 +61,11 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
         liveTweets.setAdapter(tweetsAdapter);
 
         twitterStreamPresenter.setView(this);
+
+        Intent intent = getIntent();
+        if (intent.hasExtra(BACKPRESSURE_STRATEGY_EXTRA_KEY)) {
+            backPressureStrategy = (BackPressureStrategy) intent.getSerializableExtra(BACKPRESSURE_STRATEGY_EXTRA_KEY);
+        }
     }
 
     @Override
@@ -169,7 +177,7 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
     }
 
     private void bindViews() {
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_stream);
 
         liveTweets = (RecyclerView) findViewById(R.id.live_tweets_list);
         termsSearch = (EditText) findViewById(R.id.terms_search);
@@ -177,6 +185,13 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
         setSupportActionBar(toolbar);
 
         toolbar.setTitleTextColor(Color.WHITE);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    public static Intent createIntent(Context context, BackPressureStrategy strategy) {
+        Intent intent = new Intent(context, StreamActivity.class);
+        intent.putExtra(BACKPRESSURE_STRATEGY_EXTRA_KEY, strategy);
+        return intent;
     }
 
     private class TweetsAdapter extends RecyclerView.Adapter<TweetViewHolder> {

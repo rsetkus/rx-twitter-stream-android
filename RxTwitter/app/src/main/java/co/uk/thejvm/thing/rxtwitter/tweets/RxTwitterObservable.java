@@ -1,4 +1,4 @@
-package co.uk.thejvm.thing.rxtwitter.stream;
+package co.uk.thejvm.thing.rxtwitter.tweets;
 
 import java.util.Collections;
 import java.util.List;
