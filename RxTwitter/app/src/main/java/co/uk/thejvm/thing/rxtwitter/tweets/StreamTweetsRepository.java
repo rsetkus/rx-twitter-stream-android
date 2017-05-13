@@ -4,7 +4,6 @@ import java.util.List;
 
 import co.uk.thejvm.thing.rxtwitter.common.util.TwitterMapper;
 import co.uk.thejvm.thing.rxtwitter.data.Tweet;
-import co.uk.thejvm.thing.rxtwitter.stream.RxTwitterObservable;
 import io.reactivex.Observable;
 import io.reactivex.annotations.NonNull;
 import twitter4j.TwitterStream;

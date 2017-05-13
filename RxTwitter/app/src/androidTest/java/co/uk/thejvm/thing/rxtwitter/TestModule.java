@@ -5,11 +5,17 @@ import android.app.Application;
 import co.uk.thejvm.thing.rxtwitter.common.di.ActivityModule;
 import co.uk.thejvm.thing.rxtwitter.common.di.ApplicationModule;
 import co.uk.thejvm.thing.rxtwitter.common.di.ModuleBootstrapper;
+import twitter4j.TwitterStream;
+import twitter4j.conf.Configuration;
+
+import static org.mockito.Mockito.mock;
 
 /**
  * Dagger2 test module used for espresso tests
  */
 public class TestModule extends ApplicationModule {
+
+    private TwitterStream mockTwitterStream = mock(TwitterStream.class);
 
     public TestModule(Application application) {
         super(application);
@@ -27,5 +33,10 @@ public class TestModule extends ApplicationModule {
 
     protected ActivityModule getActivityModule(BaseActivity baseActivity) {
         return new ActivityModule(baseActivity);
+    }
+
+    @Override
+    public TwitterStream provideTwitterStream(Configuration configuration) {
+        return mockTwitterStream;
     }
 }
