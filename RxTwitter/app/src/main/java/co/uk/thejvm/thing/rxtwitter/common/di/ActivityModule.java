@@ -1,15 +1,15 @@
 package co.uk.thejvm.thing.rxtwitter.common.di;
 
-import android.app.Activity;
-
 import co.uk.thejvm.thing.rxtwitter.BaseActivity;
-import co.uk.thejvm.thing.rxtwitter.common.util.PostExecutionThread;
+import co.uk.thejvm.thing.rxtwitter.common.util.PostExecutionScheduler;
 import co.uk.thejvm.thing.rxtwitter.common.util.SimpleTwitterMapper;
 import co.uk.thejvm.thing.rxtwitter.common.util.TwitterMapper;
-import co.uk.thejvm.thing.rxtwitter.common.util.UIThread;
+import co.uk.thejvm.thing.rxtwitter.common.util.UIScheduler;
 import co.uk.thejvm.thing.rxtwitter.stream.TwitterStreamPresenter;
+import co.uk.thejvm.thing.rxtwitter.tweets.ImageLoaderTwitterAvatarRepository;
 import co.uk.thejvm.thing.rxtwitter.tweets.StreamTweetsRepository;
 import co.uk.thejvm.thing.rxtwitter.tweets.TweetsRepository;
+import co.uk.thejvm.thing.rxtwitter.tweets.TwitterAvatarRepository;
 import dagger.Module;
 import dagger.Provides;
 import twitter4j.TwitterStream;
@@ -37,13 +37,22 @@ public class ActivityModule {
 
     @ActivityScope
     @Provides
-    public PostExecutionThread getPostExecutionThread() {
-        return new UIThread();
+    public TwitterAvatarRepository provideTwitterAvatarRepository() {
+        return new ImageLoaderTwitterAvatarRepository();
     }
 
     @ActivityScope
     @Provides
-    public TwitterStreamPresenter provideTwitterStreamPresenter(TweetsRepository repository, PostExecutionThread postExecutionThread) {
-        return new TwitterStreamPresenter(repository, postExecutionThread);
+    public PostExecutionScheduler getPostExecutionThread() {
+        return new UIScheduler();
+    }
+
+    @ActivityScope
+    @Provides
+    public TwitterStreamPresenter provideTwitterStreamPresenter(TweetsRepository repository,
+                                                                TwitterAvatarRepository avatarRepository,
+                                                                PostExecutionScheduler postExecutionScheduler) {
+
+        return new TwitterStreamPresenter(repository, avatarRepository, postExecutionScheduler);
     }
 }

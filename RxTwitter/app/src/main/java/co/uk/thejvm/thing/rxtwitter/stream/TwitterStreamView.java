@@ -1,8 +1,8 @@
 package co.uk.thejvm.thing.rxtwitter.stream;
 
 import co.uk.thejvm.thing.rxtwitter.common.BaseView;
-import co.uk.thejvm.thing.rxtwitter.data.Tweet;
+import co.uk.thejvm.thing.rxtwitter.data.TweetViewModel;
 
 public interface TwitterStreamView extends BaseView {
-    void renderTweet(Tweet tweet);
+    void renderTweet(TweetViewModel tweet);
 }

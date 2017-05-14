@@ -3,40 +3,44 @@ package co.uk.thejvm.thing.rxtwitter.stream;
 import java.util.List;
 
 import co.uk.thejvm.thing.rxtwitter.common.BasePresenter;
-import co.uk.thejvm.thing.rxtwitter.common.util.PostExecutionThread;
-import co.uk.thejvm.thing.rxtwitter.data.Tweet;
+import co.uk.thejvm.thing.rxtwitter.common.util.PostExecutionScheduler;
+import co.uk.thejvm.thing.rxtwitter.data.TweetViewModel;
 import co.uk.thejvm.thing.rxtwitter.tweets.TweetsRepository;
-import io.reactivex.android.schedulers.AndroidSchedulers;
+import co.uk.thejvm.thing.rxtwitter.tweets.TwitterAvatarRepository;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subscribers.DisposableSubscriber;
+
+import static io.reactivex.Flowable.just;
+import static io.reactivex.Flowable.zip;
 
 public class TwitterStreamPresenter implements BasePresenter<TwitterStreamView> {
 
     private TwitterStreamView twitterStreamView;
     private final TweetsRepository tweetsRepository;
-    private final PostExecutionThread postExecutionThread;
+    private final TwitterAvatarRepository avatarRepository;
+    private final PostExecutionScheduler postExecutionScheduler;
     private CompositeDisposable disposable = new CompositeDisposable();
 
-    public TwitterStreamPresenter(TweetsRepository tweetsRepository, PostExecutionThread postExecutionThread) {
+    public TwitterStreamPresenter(TweetsRepository tweetsRepository, TwitterAvatarRepository avatarRepository, PostExecutionScheduler thread) {
         this.tweetsRepository = tweetsRepository;
-        this.postExecutionThread = postExecutionThread;
+        this.avatarRepository = avatarRepository;
+        this.postExecutionScheduler = thread;
     }
 
     public void connectToStream(List<String> terms) {
-        /* Observable...
 
         tweetsRepository.getTweets(terms)
-            .observeOn(Schedulers.io())
-            .observeOn(postExecutionThread.getScheduler())
-            .subscribeWith(new TweetStreamObserver());*/
-
-        tweetsRepository.getFlowableTweets(terms)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeWith(new TweetStreamSubcriber());
+           // .subscribeOn(Schedulers.io()) < - should we write another scheduler for this to inject,  this currently breaks tests
+            .flatMap(tweet ->
+                zip(
+                    just(tweet), avatarRepository.getAvatar(tweet.getImageUri()),
+                    (tweet1, bitmap) -> new TweetViewModel(tweet1.getContent(), bitmap, tweet1.getDateLabel())
+                )
+            )
+            .observeOn(postExecutionScheduler.getScheduler())
+            .subscribe(new TweetStreamSubcriber());
     }
 
     @Override
@@ -49,41 +53,18 @@ public class TwitterStreamPresenter implements BasePresenter<TwitterStreamView> 
         disposable.clear();
     }
 
-    @Override
-    public void dispose() {
-        disposable.clear();
-    }
-
     public boolean isDisposed() {
         return disposable.size() == 0;
     }
 
-    private class TweetStreamObserver extends DisposableObserver<Tweet> {
-
-        public TweetStreamObserver() {
-            disposable.add(this);
-        }
-
-        @Override
-        public void onNext(@NonNull Tweet tweet) {
-            twitterStreamView.renderTweet(tweet);
-        }
-
-        @Override
-        public void onError(@NonNull Throwable e) {}
-
-        @Override
-        public void onComplete() {}
-    }
-
-    private class TweetStreamSubcriber extends DisposableSubscriber<Tweet> {
+    private class TweetStreamSubcriber extends DisposableSubscriber<TweetViewModel> {
 
         public TweetStreamSubcriber() {
             disposable.add(this);
         }
 
         @Override
-        public void onNext(@NonNull Tweet tweet) {
+        public void onNext(@NonNull TweetViewModel tweet) {
             twitterStreamView.renderTweet(tweet);
         }
 
@@ -93,6 +74,7 @@ public class TwitterStreamPresenter implements BasePresenter<TwitterStreamView> 
         }
 
         @Override
-        public void onComplete() {}
+        public void onComplete() {
+        }
     }
 }

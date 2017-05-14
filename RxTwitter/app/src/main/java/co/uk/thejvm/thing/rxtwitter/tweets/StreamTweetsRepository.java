@@ -25,21 +25,8 @@ public class StreamTweetsRepository implements TweetsRepository {
         this.twitterMapper = twitterMapper;
     }
 
-    @Override
-    public Observable<Tweet> getTweets(@NonNull List<String> terms) {
-       /* Observable<Status> statusObservable = new RxTwitterObservable.Builder()
-                .setTerms(terms)
-                .setTwitterStream(twitterStream)
-                .build();
 
-        return statusObservable
-                .flatMap(s -> new RxUniversalImageLoader(s.getUser().getOriginalProfileImageURL())
-                        .zipWith(just(s), (Bitmap b, Status status) -> twitterMapper.from(status, b)));
-        */
-       return Observable.empty();
-    }
-
-    public Flowable<Tweet> getFlowableTweets(List<String> terms) {
+    public Flowable<Tweet> getTweets(List<String> terms) {
         return Flowable.create(emitter -> {
              TweetListener listener = new TweetListener(emitter, twitterMapper);
              emitter.setCancellable(() -> twitterStream.removeListener(listener));

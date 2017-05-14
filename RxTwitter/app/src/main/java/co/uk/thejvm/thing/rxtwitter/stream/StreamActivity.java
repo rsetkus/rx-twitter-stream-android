@@ -32,7 +32,7 @@ import javax.inject.Inject;
 import co.uk.thejvm.thing.rxtwitter.BaseActivity;
 import co.uk.thejvm.thing.rxtwitter.R;
 import co.uk.thejvm.thing.rxtwitter.common.BackPressureStrategy;
-import co.uk.thejvm.thing.rxtwitter.data.Tweet;
+import co.uk.thejvm.thing.rxtwitter.data.TweetViewModel;
 
 public class StreamActivity extends BaseActivity implements TwitterStreamView {
 
@@ -99,7 +99,7 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
 
     @Override
     public void onBackPressed() {
-        if(isSearchOpened) {
+        if (isSearchOpened) {
             handleMenuSearch();
             return;
         }
@@ -117,7 +117,7 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
     }
 
     @Override
-    public void renderTweet(Tweet tweet) {
+    public void renderTweet(TweetViewModel tweet) {
         tweetsAdapter.insertNewTweet(tweet);
         liveTweets.smoothScrollToPosition(RECENT_TWEET_POSITION);
     }
@@ -130,7 +130,7 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
     private void handleMenuSearch() {
         ActionBar supportActionBar = getSupportActionBar();
 
-        if (isSearchOpened){
+        if (isSearchOpened) {
             disableSearch(supportActionBar);
         } else {
 
@@ -138,7 +138,7 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
             supportActionBar.setCustomView(R.layout.search_bar);
             supportActionBar.setDisplayShowTitleEnabled(false);
 
-            termsSearch = (EditText)supportActionBar.getCustomView().findViewById(R.id.terms_search);
+            termsSearch = (EditText) supportActionBar.getCustomView().findViewById(R.id.terms_search);
 
             termsSearch.setOnEditorActionListener((view, id, event) -> {
                 if (id == EditorInfo.IME_ACTION_SEARCH) {
@@ -175,7 +175,7 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
 
     private void doSearch(String term) {
         tweetsAdapter.clear();
-        twitterStreamPresenter.dispose();
+        twitterStreamPresenter.onPause();
         twitterStreamPresenter.connectToStream(Lists.newArrayList(term));
     }
 
@@ -199,7 +199,7 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
 
     private class TweetsAdapter extends RecyclerView.Adapter<TweetViewHolder> {
 
-        private List<Tweet> tweets = Lists.newArrayList();
+        private List<TweetViewModel> tweets = Lists.newArrayList();
 
         @Override
         public TweetViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -217,7 +217,7 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
             return tweets.size();
         }
 
-        public void insertNewTweet(Tweet tweet) {
+        public void insertNewTweet(TweetViewModel tweet) {
             tweets.add(RECENT_TWEET_POSITION, tweet);
             notifyItemInserted(RECENT_TWEET_POSITION);
         }
@@ -242,14 +242,14 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
             avatar = (ImageView) itemView.findViewById(R.id.profile_avatar);
         }
 
-        public void setTweet(Tweet tweet) {
+        public void setTweet(TweetViewModel tweet) {
             tweetContent.setText(tweet.getContent());
             tweetCreatedDateLabel.setText(tweet.getDateLabel());
 
-            /*Optional<Bitmap> bitmapOptional = Optional.fromNullable(tweet.getAvatarImage());
+            Optional<Bitmap> bitmapOptional = Optional.fromNullable(tweet.getAvatarImage());
             if (bitmapOptional.isPresent()) {
                 avatar.setImageBitmap(bitmapOptional.get());
-            }*/
+            }
         }
     }
 }
