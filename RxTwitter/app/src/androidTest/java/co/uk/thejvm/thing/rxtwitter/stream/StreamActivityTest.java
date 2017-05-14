@@ -102,18 +102,7 @@ public class StreamActivityTest {
         resultRobot.checkSizeOfTweetsList(tweets.size());
         resultRobot.verifyIfReconectedToStreamByNewTerm();
     }
-
-    @Test
-    public void whenOnPause_thenInformPresenter() {
-        ResultRobot resultRobot = new StreamTweetActivityRobot()
-            .launchActivity()
-            .pause()
-            .verify();
-
-        resultRobot.ensurePresenterIsPaused();
-
-    }
-
+    
     private class StreamTweetActivityRobot {
 
         public ResultRobot verify() {
