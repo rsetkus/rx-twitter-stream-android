@@ -3,13 +3,12 @@ package co.uk.thejvm.thing.rxtwitter.stream;
 import java.util.List;
 
 import co.uk.thejvm.thing.rxtwitter.common.BasePresenter;
-import co.uk.thejvm.thing.rxtwitter.common.util.PostExecutionScheduler;
+import co.uk.thejvm.thing.rxtwitter.common.util.ExecutionScheduler;
 import co.uk.thejvm.thing.rxtwitter.data.TweetViewModel;
 import co.uk.thejvm.thing.rxtwitter.tweets.TweetsRepository;
 import co.uk.thejvm.thing.rxtwitter.tweets.TwitterAvatarRepository;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subscribers.DisposableSubscriber;
 
 import static io.reactivex.Flowable.just;
@@ -20,26 +19,28 @@ public class TwitterStreamPresenter implements BasePresenter<TwitterStreamView> 
     private TwitterStreamView twitterStreamView;
     private final TweetsRepository tweetsRepository;
     private final TwitterAvatarRepository avatarRepository;
-    private final PostExecutionScheduler postExecutionScheduler;
+    private final ExecutionScheduler uiThread, ioThread;
     private CompositeDisposable disposable = new CompositeDisposable();
 
-    public TwitterStreamPresenter(TweetsRepository tweetsRepository, TwitterAvatarRepository avatarRepository, PostExecutionScheduler thread) {
+    public TwitterStreamPresenter(TweetsRepository tweetsRepository, TwitterAvatarRepository avatarRepository,
+                                  ExecutionScheduler uiThread, ExecutionScheduler ioThread) {
         this.tweetsRepository = tweetsRepository;
         this.avatarRepository = avatarRepository;
-        this.postExecutionScheduler = thread;
+        this.uiThread = uiThread;
+        this.ioThread = ioThread;
     }
 
     public void connectToStream(List<String> terms) {
 
         tweetsRepository.getTweets(terms)
-            .subscribeOn(Schedulers.io())//  < - should we write another scheduler for this to inject,  this currently breaks tests
+            .subscribeOn(ioThread.getScheduler())
             .flatMap(rawTweet ->
                 zip(
                     just(rawTweet), avatarRepository.getAvatar(rawTweet.getImageUri()),
                     (tweet, bitmap) -> new TweetViewModel(tweet.getContent(), bitmap, tweet.getDateLabel())
                 )
             )
-            .observeOn(postExecutionScheduler.getScheduler())
+            .observeOn(uiThread.getScheduler())
             .subscribe(new TweetStreamSubcriber());
     }
 

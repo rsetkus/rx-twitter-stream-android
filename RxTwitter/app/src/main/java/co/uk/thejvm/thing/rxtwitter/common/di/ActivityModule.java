@@ -1,7 +1,10 @@
 package co.uk.thejvm.thing.rxtwitter.common.di;
 
+import javax.inject.Named;
+
 import co.uk.thejvm.thing.rxtwitter.BaseActivity;
-import co.uk.thejvm.thing.rxtwitter.common.util.PostExecutionScheduler;
+import co.uk.thejvm.thing.rxtwitter.common.util.ExecutionScheduler;
+import co.uk.thejvm.thing.rxtwitter.common.util.IOScheduler;
 import co.uk.thejvm.thing.rxtwitter.common.util.SimpleTwitterMapper;
 import co.uk.thejvm.thing.rxtwitter.common.util.TwitterMapper;
 import co.uk.thejvm.thing.rxtwitter.common.util.UIScheduler;
@@ -42,17 +45,24 @@ public class ActivityModule {
     }
 
     @ActivityScope
-    @Provides
-    public PostExecutionScheduler getPostExecutionThread() {
+    @Provides @Named("ui")
+    public ExecutionScheduler getUiExecutionScheduler() {
         return new UIScheduler();
+    }
+
+    @ActivityScope
+    @Provides @Named("io")
+    public ExecutionScheduler getIoExecutionScheduler() {
+        return new IOScheduler();
     }
 
     @ActivityScope
     @Provides
     public TwitterStreamPresenter provideTwitterStreamPresenter(TweetsRepository repository,
                                                                 TwitterAvatarRepository avatarRepository,
-                                                                PostExecutionScheduler postExecutionScheduler) {
+                                                                @Named("ui") ExecutionScheduler uiScheduler,
+                                                                @Named("io") ExecutionScheduler ioScheduler) {
 
-        return new TwitterStreamPresenter(repository, avatarRepository, postExecutionScheduler);
+        return new TwitterStreamPresenter(repository, avatarRepository, uiScheduler, ioScheduler);
     }
 }

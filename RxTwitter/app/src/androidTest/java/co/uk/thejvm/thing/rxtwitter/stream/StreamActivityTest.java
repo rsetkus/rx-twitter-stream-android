@@ -22,7 +22,7 @@ import co.uk.thejvm.thing.rxtwitter.RxTwitterApplication;
 import co.uk.thejvm.thing.rxtwitter.TestModule;
 import co.uk.thejvm.thing.rxtwitter.common.di.ActivityModule;
 import co.uk.thejvm.thing.rxtwitter.common.di.ApplicationModule;
-import co.uk.thejvm.thing.rxtwitter.common.util.PostExecutionScheduler;
+import co.uk.thejvm.thing.rxtwitter.common.util.ExecutionScheduler;
 import co.uk.thejvm.thing.rxtwitter.data.TweetViewModel;
 import co.uk.thejvm.thing.rxtwitter.tweets.TweetsRepository;
 import co.uk.thejvm.thing.rxtwitter.tweets.TwitterAvatarRepository;
@@ -73,7 +73,7 @@ public class StreamActivityTest {
                             @Override
                             public TwitterStreamPresenter provideTwitterStreamPresenter(TweetsRepository repository,
                                                                                         TwitterAvatarRepository avatarRepository,
-                                                                                        PostExecutionScheduler postExecutionScheduler) {
+                                                                                        ExecutionScheduler executionScheduler) {
                                 return mockTwitterStreamPresenter;
                             }
                         };
@@ -102,7 +102,7 @@ public class StreamActivityTest {
         resultRobot.checkSizeOfTweetsList(tweets.size());
         resultRobot.verifyIfReconectedToStreamByNewTerm();
     }
-    
+
     private class StreamTweetActivityRobot {
 
         public ResultRobot verify() {

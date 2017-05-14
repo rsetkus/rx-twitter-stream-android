@@ -25,7 +25,6 @@ public class StreamTweetsRepository implements TweetsRepository {
         this.twitterMapper = twitterMapper;
     }
 
-
     public Flowable<Tweet> getTweets(List<String> terms) {
         return Flowable.create(emitter -> {
              TweetListener listener = new TweetListener(emitter, twitterMapper);
