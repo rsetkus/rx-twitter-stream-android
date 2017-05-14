@@ -246,10 +246,10 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
             tweetContent.setText(tweet.getContent());
             tweetCreatedDateLabel.setText(tweet.getDateLabel());
 
-            Optional<Bitmap> bitmapOptional = Optional.fromNullable(tweet.getAvatarImage());
+            /*Optional<Bitmap> bitmapOptional = Optional.fromNullable(tweet.getAvatarImage());
             if (bitmapOptional.isPresent()) {
                 avatar.setImageBitmap(bitmapOptional.get());
-            }
+            }*/
         }
     }
 }
