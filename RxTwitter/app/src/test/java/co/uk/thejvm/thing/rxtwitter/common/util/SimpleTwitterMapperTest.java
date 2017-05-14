@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Calendar;
@@ -27,29 +28,33 @@ import twitter4j.UserMentionEntity;
 
 import static junit.framework.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SimpleTwitterMapperTest {
 
-    private Bitmap mockBitmap = mock(Bitmap.class);
+    @Mock private Bitmap mockBitmap;
+    @Mock private static User user;
 
     private SimpleTwitterMapper simpleTwitterMapper;
 
     private static final String TWEET_TEXT = "GO REACTIVE OR GO HOME";
     private static final Status FAKE_STATUS = new FakeStatus();
     private static final String EXPECTED_DATE_LABEL = "2017.05.11 21:55:11";
+    private static final String EXPECTED_IMAGE_URI = "http://twitter/image.jpg";
 
     private Tweet expectedTweet;
 
     @Before
     public void setUp() {
-        expectedTweet = new Tweet(TWEET_TEXT, mockBitmap, EXPECTED_DATE_LABEL);
+        when(user.getOriginalProfileImageURL()).thenReturn(EXPECTED_IMAGE_URI);
+        expectedTweet = new Tweet(TWEET_TEXT, EXPECTED_DATE_LABEL, EXPECTED_IMAGE_URI);
         simpleTwitterMapper = new SimpleTwitterMapper();
     }
 
     @Test
     public void whenTweetReceived_ShouldMapCorrectly() {
-        Tweet tweet = simpleTwitterMapper.from(FAKE_STATUS, mockBitmap);
+        Tweet tweet = simpleTwitterMapper.from(FAKE_STATUS);
         assertEquals(expectedTweet, tweet);
     }
 
@@ -128,7 +133,7 @@ public class SimpleTwitterMapperTest {
 
         @Override
         public User getUser() {
-            return null;
+            return user;
         }
 
         @Override

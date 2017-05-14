@@ -22,9 +22,10 @@ import co.uk.thejvm.thing.rxtwitter.RxTwitterApplication;
 import co.uk.thejvm.thing.rxtwitter.TestModule;
 import co.uk.thejvm.thing.rxtwitter.common.di.ActivityModule;
 import co.uk.thejvm.thing.rxtwitter.common.di.ApplicationModule;
-import co.uk.thejvm.thing.rxtwitter.common.util.PostExecutionThread;
-import co.uk.thejvm.thing.rxtwitter.data.Tweet;
+import co.uk.thejvm.thing.rxtwitter.common.util.ExecutionScheduler;
+import co.uk.thejvm.thing.rxtwitter.data.TweetViewModel;
 import co.uk.thejvm.thing.rxtwitter.tweets.TweetsRepository;
+import co.uk.thejvm.thing.rxtwitter.tweets.TwitterAvatarRepository;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
@@ -52,38 +53,41 @@ public class StreamActivityTest {
     private static final boolean LAUNCH_ACTIVITY = false;
     private Context context = InstrumentationRegistry.getTargetContext();
 
-    private List<Tweet> tweets = Lists.newArrayList(new Tweet("go reactive or go home", fakeBitmap, "2017.05.11 21:00"));
+    private List<TweetViewModel> tweets = Lists.newArrayList(new TweetViewModel("go reactive or go home", fakeBitmap, "2017.05.11 21:00"));
 
     @Rule
     public BaseActivityRule<StreamActivity> activityTestRule =
-            new BaseActivityRule<StreamActivity>(StreamActivity.class, LAUNCH_ACTIVITY) {
+        new BaseActivityRule<StreamActivity>(StreamActivity.class, LAUNCH_ACTIVITY) {
 
-                @Override
-                public ApplicationModule getApplicationModule() {
+            @Override
+            public ApplicationModule getApplicationModule() {
 
-                    RxTwitterApplication application = (RxTwitterApplication) context.getApplicationContext();
+                RxTwitterApplication application = (RxTwitterApplication) context.getApplicationContext();
 
-                    return new TestModule(application) {
+                return new TestModule(application) {
 
-                        @Override
-                        protected ActivityModule getActivityModule(BaseActivity baseActivity) {
+                    @Override
+                    protected ActivityModule getActivityModule(BaseActivity baseActivity) {
 
-                            return new ActivityModule(baseActivity) {
-                                @Override
-                                public TwitterStreamPresenter provideTwitterStreamPresenter(TweetsRepository repository, PostExecutionThread postExecutionThread) {
-                                    return mockTwitterStreamPresenter;
-                                }
-                            };
-                        }
-                    };
-                }
-            };
+                        return new ActivityModule(baseActivity) {
+                            @Override
+                            public TwitterStreamPresenter provideTwitterStreamPresenter(TweetsRepository repository,
+                                                                                        TwitterAvatarRepository avatarRepository,
+                                                                                        ExecutionScheduler uiScheduler,
+                                                                                        ExecutionScheduler ioScheduler) {
+                                return mockTwitterStreamPresenter;
+                            }
+                        };
+                    }
+                };
+            }
+        };
 
     /**
      * When twee received should render on recycler view.
      */
     @Test
-    public void whenTweeReceived_ShouldRenderOnRecyclerView() {
+    public void whenTweetReceived_ShouldRenderOnRecyclerView() {
         ResultRobot resultRobot = new StreamTweetActivityRobot().launchActivity().performSearch().verify();
         resultRobot.checkIfTweetTextIsVisibleOnScreen();
         resultRobot.checkIfTweetDateIsVisible();
@@ -126,7 +130,7 @@ public class StreamActivityTest {
 
         private void stubStream() {
             doAnswer(invocation -> new Handler().postAtFrontOfQueue(() -> {
-                for (Tweet tweet : tweets) {
+                for (TweetViewModel tweet : tweets) {
                     getTwitterStreamView().renderTweet(tweet);
                 }
             })).when(mockTwitterStreamPresenter).connectToStream(any());
@@ -137,18 +141,23 @@ public class StreamActivityTest {
             onView(withId(R.id.terms_search)).perform(pressImeActionButton());
             return this;
         }
+
+        public StreamTweetActivityRobot pause() {
+            activityTestRule.getActivity().onPause();
+            return this;
+        }
     }
 
     private class ResultRobot {
 
         public void checkIfTweetTextIsVisibleOnScreen() {
-            for (Tweet tweet : tweets) {
+            for (TweetViewModel tweet : tweets) {
                 onView(withText(tweet.getContent())).check(matches(isDisplayed()));
             }
         }
 
         public void checkIfTweetDateIsVisible() {
-            for (Tweet tweet : tweets) {
+            for (TweetViewModel tweet : tweets) {
                 onView(withText(tweet.getDateLabel())).check(matches(isDisplayed()));
             }
         }
@@ -158,8 +167,12 @@ public class StreamActivityTest {
         }
 
         public void verifyIfReconectedToStreamByNewTerm() {
-            verify(mockTwitterStreamPresenter).dispose();
+            verify(mockTwitterStreamPresenter).onPause();
             verify(mockTwitterStreamPresenter).connectToStream(anyList());
+        }
+
+        public void ensurePresenterIsPaused() {
+            verify(mockTwitterStreamPresenter).onPause();
         }
     }
 }
