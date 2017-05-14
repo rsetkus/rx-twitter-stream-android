@@ -6,6 +6,8 @@ import java.util.List;
 
 import co.uk.thejvm.thing.rxtwitter.common.util.TwitterMapper;
 import co.uk.thejvm.thing.rxtwitter.data.Tweet;
+import io.reactivex.BackpressureStrategy;
+import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import io.reactivex.annotations.NonNull;
 import twitter4j.Status;
@@ -25,7 +27,7 @@ public class StreamTweetsRepository implements TweetsRepository {
 
     @Override
     public Observable<Tweet> getTweets(@NonNull List<String> terms) {
-        Observable<Status> statusObservable = new RxTwitterObservable.Builder()
+       /* Observable<Status> statusObservable = new RxTwitterObservable.Builder()
                 .setTerms(terms)
                 .setTwitterStream(twitterStream)
                 .build();
@@ -33,5 +35,16 @@ public class StreamTweetsRepository implements TweetsRepository {
         return statusObservable
                 .flatMap(s -> new RxUniversalImageLoader(s.getUser().getOriginalProfileImageURL())
                         .zipWith(just(s), (Bitmap b, Status status) -> twitterMapper.from(status, b)));
+        */
+       return Observable.empty();
+    }
+
+    public Flowable<Tweet> getFlowableTweets(List<String> terms) {
+        return Flowable.create(emitter -> {
+             TweetListener listener = new TweetListener(emitter, twitterMapper);
+             emitter.setCancellable(() -> twitterStream.removeListener(listener));
+             twitterStream.addListener(listener);
+             twitterStream.filter(terms.toArray(new String[terms.size()]));
+         }, BackpressureStrategy.ERROR);
     }
 }

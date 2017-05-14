@@ -8,17 +8,17 @@ import co.uk.thejvm.thing.rxtwitter.data.Tweet;
 import co.uk.thejvm.thing.rxtwitter.tweets.TweetsRepository;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.disposables.Disposables;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subscribers.DisposableSubscriber;
 
 public class TwitterStreamPresenter implements BasePresenter<TwitterStreamView> {
 
     private TwitterStreamView twitterStreamView;
     private final TweetsRepository tweetsRepository;
     private final PostExecutionThread postExecutionThread;
-    private Disposable disposable = Disposables.empty();
+    private CompositeDisposable disposable = new CompositeDisposable();
 
     public TwitterStreamPresenter(TweetsRepository tweetsRepository, PostExecutionThread postExecutionThread) {
         this.tweetsRepository = tweetsRepository;
@@ -26,10 +26,17 @@ public class TwitterStreamPresenter implements BasePresenter<TwitterStreamView> 
     }
 
     public void connectToStream(List<String> terms) {
-        disposable = tweetsRepository.getTweets(terms)
-                .observeOn(Schedulers.io())
-                .observeOn(postExecutionThread.getScheduler())
-                .subscribeWith(new TweetStreamObserver());
+        /* Observable...
+
+        tweetsRepository.getTweets(terms)
+            .observeOn(Schedulers.io())
+            .observeOn(postExecutionThread.getScheduler())
+            .subscribeWith(new TweetStreamObserver());*/
+
+        tweetsRepository.getFlowableTweets(terms)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeWith(new TweetStreamSubcriber());
     }
 
     @Override
@@ -39,19 +46,41 @@ public class TwitterStreamPresenter implements BasePresenter<TwitterStreamView> 
 
     @Override
     public void onPause() {
-        disposable.dispose();
+        disposable.clear();
     }
 
     @Override
     public void dispose() {
-        disposable.dispose();
+        disposable.clear();
     }
 
     public boolean isDisposed() {
-        return disposable.isDisposed();
+        return disposable.size() == 0;
     }
 
     private class TweetStreamObserver extends DisposableObserver<Tweet> {
+
+        public TweetStreamObserver() {
+            disposable.add(this);
+        }
+
+        @Override
+        public void onNext(@NonNull Tweet tweet) {
+            twitterStreamView.renderTweet(tweet);
+        }
+
+        @Override
+        public void onError(@NonNull Throwable e) {}
+
+        @Override
+        public void onComplete() {}
+    }
+
+    private class TweetStreamSubcriber extends DisposableSubscriber<Tweet> {
+
+        public TweetStreamSubcriber() {
+            disposable.add(this);
+        }
 
         @Override
         public void onNext(@NonNull Tweet tweet) {
@@ -60,12 +89,10 @@ public class TwitterStreamPresenter implements BasePresenter<TwitterStreamView> 
 
         @Override
         public void onError(@NonNull Throwable e) {
-
+            // view.deadBird();
         }
 
         @Override
-        public void onComplete() {
-
-        }
+        public void onComplete() {}
     }
 }
