@@ -42,4 +42,5 @@ ext {
     daggerVersion = '2.7'
     dexmakerVersion = '1.2'
     twitter4jVersion = '4.0.4'
+    univerImageLoaderVersion = '1.9.5'
 }

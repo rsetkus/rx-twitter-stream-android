@@ -47,6 +47,7 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$rootProject.kotlinVersion"
     compile "org.twitter4j:twitter4j-core:$rootProject.twitter4jVersion"
     compile "org.twitter4j:twitter4j-stream:$rootProject.twitter4jVersion"
+    compile "com.nostra13.universalimageloader:universal-image-loader:$rootProject.univerImageLoaderVersion"
 
     // Dagger dependencies
     apt "com.google.dagger:dagger-compiler:$rootProject.daggerVersion"

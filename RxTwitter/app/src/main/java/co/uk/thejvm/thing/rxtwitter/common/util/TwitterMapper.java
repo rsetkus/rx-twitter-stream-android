@@ -1,8 +1,10 @@
 package co.uk.thejvm.thing.rxtwitter.common.util;
 
+import android.graphics.Bitmap;
+
 import co.uk.thejvm.thing.rxtwitter.data.Tweet;
 import twitter4j.Status;
 
 public interface TwitterMapper {
-    Tweet from(Status status);
+    Tweet from(Status status, Bitmap bitmap);
 }

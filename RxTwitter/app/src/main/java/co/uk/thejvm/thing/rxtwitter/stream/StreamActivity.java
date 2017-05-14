@@ -2,6 +2,7 @@ package co.uk.thejvm.thing.rxtwitter.stream;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -18,8 +19,10 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
 import java.util.List;
@@ -229,17 +232,24 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
 
         private TextView tweetContent;
         private TextView tweetCreatedDateLabel;
+        private ImageView avatar;
 
         public TweetViewHolder(View itemView) {
             super(itemView);
 
             tweetContent = (TextView) itemView.findViewById(R.id.tweet_content);
             tweetCreatedDateLabel = (TextView) itemView.findViewById(R.id.tweet_created_date_label);
+            avatar = (ImageView) itemView.findViewById(R.id.profile_avatar);
         }
 
         public void setTweet(Tweet tweet) {
             tweetContent.setText(tweet.getContent());
             tweetCreatedDateLabel.setText(tweet.getDateLabel());
+
+            Optional<Bitmap> bitmapOptional = Optional.fromNullable(tweet.getAvatarImage());
+            if (bitmapOptional.isPresent()) {
+                avatar.setImageBitmap(bitmapOptional.get());
+            }
         }
     }
 }

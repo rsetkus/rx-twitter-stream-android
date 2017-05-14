@@ -1,5 +1,6 @@
 package co.uk.thejvm.thing.rxtwitter.common.util;
 
+import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 
 import org.junit.Before;
@@ -25,9 +26,12 @@ import twitter4j.User;
 import twitter4j.UserMentionEntity;
 
 import static junit.framework.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SimpleTwitterMapperTest {
+
+    private Bitmap mockBitmap = mock(Bitmap.class);
 
     private SimpleTwitterMapper simpleTwitterMapper;
 
@@ -35,17 +39,18 @@ public class SimpleTwitterMapperTest {
     private static final Status FAKE_STATUS = new FakeStatus();
     private static final String EXPECTED_DATE_LABEL = "2017.05.11 21:55:11";
 
-    private static final Tweet EXPECTED_TWEET = new Tweet(TWEET_TEXT, EXPECTED_DATE_LABEL);
+    private Tweet expectedTweet;
 
     @Before
     public void setUp() {
+        expectedTweet = new Tweet(TWEET_TEXT, mockBitmap, EXPECTED_DATE_LABEL);
         simpleTwitterMapper = new SimpleTwitterMapper();
     }
 
     @Test
     public void whenTweetReceived_ShouldMapCorrectly() {
-        Tweet tweet = simpleTwitterMapper.from(FAKE_STATUS);
-        assertEquals(EXPECTED_TWEET, tweet);
+        Tweet tweet = simpleTwitterMapper.from(FAKE_STATUS, mockBitmap);
+        assertEquals(expectedTweet, tweet);
     }
 
     private static Date getTweetDate() {
