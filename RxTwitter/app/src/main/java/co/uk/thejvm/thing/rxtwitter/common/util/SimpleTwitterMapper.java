@@ -1,5 +1,7 @@
 package co.uk.thejvm.thing.rxtwitter.common.util;
 
+import android.graphics.Bitmap;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -11,8 +13,8 @@ public class SimpleTwitterMapper implements TwitterMapper {
     private static final String PATTERN = "yyyy.MM.dd HH:mm:ss";
 
     @Override
-    public Tweet from(Status status) {
-        return new Tweet(status.getText(), formatDate(status.getCreatedAt()));
+    public Tweet from(Status status, Bitmap bitmap) {
+        return new Tweet(status.getText(), bitmap, formatDate(status.getCreatedAt()));
     }
 
     private String formatDate(Date date) {

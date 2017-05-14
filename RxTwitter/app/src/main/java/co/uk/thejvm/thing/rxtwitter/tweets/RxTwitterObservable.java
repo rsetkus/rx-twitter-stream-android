@@ -4,8 +4,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import co.uk.thejvm.thing.rxtwitter.common.util.TwitterMapper;
-import co.uk.thejvm.thing.rxtwitter.data.Tweet;
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
@@ -15,20 +13,18 @@ import twitter4j.StatusDeletionNotice;
 import twitter4j.StatusListener;
 import twitter4j.TwitterStream;
 
-public class RxTwitterObservable extends Observable<Tweet> {
+public class RxTwitterObservable extends Observable<Status> {
 
     private final TwitterStream twitterStream;
     private final List<String> terms;
-    private final TwitterMapper twitterMapper;
 
-    private RxTwitterObservable(TwitterStream twitterStream, List<String> terms, TwitterMapper twitterMapper) {
+    private RxTwitterObservable(TwitterStream twitterStream, List<String> terms) {
         this.twitterStream = twitterStream;
         this.terms = terms;
-        this.twitterMapper = twitterMapper;
     }
 
     @Override
-    protected void subscribeActual(Observer<? super Tweet> observer) {
+    protected void subscribeActual(Observer<? super Status> observer) {
         RxStatusListener rxStatusListener = new RxStatusListener(twitterStream, observer);
 
         observer.onSubscribe(rxStatusListener);
@@ -40,9 +36,9 @@ public class RxTwitterObservable extends Observable<Tweet> {
 
         private AtomicBoolean isDisposed = new AtomicBoolean(false);
         private final TwitterStream twitterStream;
-        private final Observer<? super Tweet> observer;
+        private final Observer<? super Status> observer;
 
-        RxStatusListener(TwitterStream twitterStream, Observer<? super Tweet> observer) {
+        RxStatusListener(TwitterStream twitterStream, Observer<? super Status> observer) {
             this.twitterStream = twitterStream;
             this.observer = observer;
         }
@@ -66,7 +62,7 @@ public class RxTwitterObservable extends Observable<Tweet> {
 
         @Override
         public void onStatus(Status status) {
-            observer.onNext(twitterMapper.from(status));
+            observer.onNext(status);
         }
 
         @Override
@@ -89,7 +85,6 @@ public class RxTwitterObservable extends Observable<Tweet> {
     public static class Builder {
         private TwitterStream twitterStream;
         private List<String> terms = Collections.EMPTY_LIST;
-        private TwitterMapper twitterMapper;
 
         public Builder setTwitterStream(TwitterStream twitterStream) {
             this.twitterStream = twitterStream;
@@ -101,13 +96,8 @@ public class RxTwitterObservable extends Observable<Tweet> {
             return this;
         }
 
-        public Builder setTwitterMapper(TwitterMapper twitterMapper) {
-            this.twitterMapper = twitterMapper;
-            return this;
-        }
-
         public RxTwitterObservable build() {
-            return new RxTwitterObservable(twitterStream, terms, twitterMapper);
+            return new RxTwitterObservable(twitterStream, terms);
         }
     }
 }

@@ -3,8 +3,10 @@ package co.uk.thejvm.thing.rxtwitter.common.di;
 import android.app.Activity;
 
 import co.uk.thejvm.thing.rxtwitter.BaseActivity;
+import co.uk.thejvm.thing.rxtwitter.common.util.PostExecutionThread;
 import co.uk.thejvm.thing.rxtwitter.common.util.SimpleTwitterMapper;
 import co.uk.thejvm.thing.rxtwitter.common.util.TwitterMapper;
+import co.uk.thejvm.thing.rxtwitter.common.util.UIThread;
 import co.uk.thejvm.thing.rxtwitter.stream.TwitterStreamPresenter;
 import co.uk.thejvm.thing.rxtwitter.tweets.StreamTweetsRepository;
 import co.uk.thejvm.thing.rxtwitter.tweets.TweetsRepository;
@@ -35,7 +37,13 @@ public class ActivityModule {
 
     @ActivityScope
     @Provides
-    public TwitterStreamPresenter provideTwitterStreamPresenter(TweetsRepository repository) {
-        return new TwitterStreamPresenter(repository);
+    public PostExecutionThread getPostExecutionThread() {
+        return new UIThread();
+    }
+
+    @ActivityScope
+    @Provides
+    public TwitterStreamPresenter provideTwitterStreamPresenter(TweetsRepository repository, PostExecutionThread postExecutionThread) {
+        return new TwitterStreamPresenter(repository, postExecutionThread);
     }
 }

@@ -2,6 +2,7 @@ package co.uk.thejvm.thing.rxtwitter.stream;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Handler;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.core.deps.guava.collect.Lists;
@@ -21,6 +22,7 @@ import co.uk.thejvm.thing.rxtwitter.RxTwitterApplication;
 import co.uk.thejvm.thing.rxtwitter.TestModule;
 import co.uk.thejvm.thing.rxtwitter.common.di.ActivityModule;
 import co.uk.thejvm.thing.rxtwitter.common.di.ApplicationModule;
+import co.uk.thejvm.thing.rxtwitter.common.util.PostExecutionThread;
 import co.uk.thejvm.thing.rxtwitter.data.Tweet;
 import co.uk.thejvm.thing.rxtwitter.tweets.TweetsRepository;
 
@@ -45,10 +47,12 @@ public class StreamActivityTest {
     private TwitterStreamPresenter mockTwitterStreamPresenter = mock(TwitterStreamPresenter.class);
     private ArgumentCaptor<TwitterStreamView> viewArgumentCaptor = ArgumentCaptor.forClass(TwitterStreamView.class);
 
+    Bitmap fakeBitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+
     private static final boolean LAUNCH_ACTIVITY = false;
     private Context context = InstrumentationRegistry.getTargetContext();
 
-    private List<Tweet> tweets = Lists.newArrayList(new Tweet("go reactive or go home", "2017.05.11 21:00"));
+    private List<Tweet> tweets = Lists.newArrayList(new Tweet("go reactive or go home", fakeBitmap, "2017.05.11 21:00"));
 
     @Rule
     public BaseActivityRule<StreamActivity> activityTestRule =
@@ -66,7 +70,7 @@ public class StreamActivityTest {
 
                             return new ActivityModule(baseActivity) {
                                 @Override
-                                public TwitterStreamPresenter provideTwitterStreamPresenter(TweetsRepository repository) {
+                                public TwitterStreamPresenter provideTwitterStreamPresenter(TweetsRepository repository, PostExecutionThread postExecutionThread) {
                                     return mockTwitterStreamPresenter;
                                 }
                             };
@@ -85,6 +89,9 @@ public class StreamActivityTest {
         resultRobot.checkIfTweetDateIsVisible();
     }
 
+    /**
+     * When search performed should clear the tweets list.
+     */
     @Test
     public void whenSearchPerformed_ShouldClearTheTweetsList() {
         ResultRobot resultRobot = new StreamTweetActivityRobot().launchActivity().performSearch().verify();
