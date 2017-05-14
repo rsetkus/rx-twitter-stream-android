@@ -55,6 +55,12 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
     private static final int RECENT_TWEET_POSITION = 0;
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        twitterStreamPresenter.onPause();
+    }
+
+    @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         bindViews();

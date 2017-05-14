@@ -103,6 +103,17 @@ public class StreamActivityTest {
         resultRobot.verifyIfReconectedToStreamByNewTerm();
     }
 
+    @Test
+    public void whenOnPause_thenInformPresenter() {
+        ResultRobot resultRobot = new StreamTweetActivityRobot()
+            .launchActivity()
+            .pause()
+            .verify();
+
+        resultRobot.ensurePresenterIsPaused();
+
+    }
+
     private class StreamTweetActivityRobot {
 
         public ResultRobot verify() {
@@ -140,6 +151,11 @@ public class StreamActivityTest {
             onView(withId(R.id.terms_search)).perform(pressImeActionButton());
             return this;
         }
+
+        public StreamTweetActivityRobot pause() {
+            activityTestRule.getActivity().onPause();
+            return this;
+        }
     }
 
     private class ResultRobot {
@@ -163,6 +179,10 @@ public class StreamActivityTest {
         public void verifyIfReconectedToStreamByNewTerm() {
             verify(mockTwitterStreamPresenter).onPause();
             verify(mockTwitterStreamPresenter).connectToStream(anyList());
+        }
+
+        public void ensurePresenterIsPaused() {
+            verify(mockTwitterStreamPresenter).onPause();
         }
     }
 }

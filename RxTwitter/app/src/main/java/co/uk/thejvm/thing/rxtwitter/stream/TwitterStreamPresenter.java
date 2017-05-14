@@ -32,11 +32,11 @@ public class TwitterStreamPresenter implements BasePresenter<TwitterStreamView> 
     public void connectToStream(List<String> terms) {
 
         tweetsRepository.getTweets(terms)
-           // .subscribeOn(Schedulers.io()) < - should we write another scheduler for this to inject,  this currently breaks tests
-            .flatMap(tweet ->
+            .subscribeOn(Schedulers.io())//  < - should we write another scheduler for this to inject,  this currently breaks tests
+            .flatMap(rawTweet ->
                 zip(
-                    just(tweet), avatarRepository.getAvatar(tweet.getImageUri()),
-                    (tweet1, bitmap) -> new TweetViewModel(tweet1.getContent(), bitmap, tweet1.getDateLabel())
+                    just(rawTweet), avatarRepository.getAvatar(rawTweet.getImageUri()),
+                    (tweet, bitmap) -> new TweetViewModel(tweet.getContent(), bitmap, tweet.getDateLabel())
                 )
             )
             .observeOn(postExecutionScheduler.getScheduler())
