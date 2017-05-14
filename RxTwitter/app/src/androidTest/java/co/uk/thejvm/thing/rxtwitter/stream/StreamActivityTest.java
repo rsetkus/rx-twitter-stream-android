@@ -73,7 +73,8 @@ public class StreamActivityTest {
                             @Override
                             public TwitterStreamPresenter provideTwitterStreamPresenter(TweetsRepository repository,
                                                                                         TwitterAvatarRepository avatarRepository,
-                                                                                        ExecutionScheduler executionScheduler) {
+                                                                                        ExecutionScheduler uiScheduler,
+                                                                                        ExecutionScheduler ioScheduler) {
                                 return mockTwitterStreamPresenter;
                             }
                         };
