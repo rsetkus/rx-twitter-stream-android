@@ -5,14 +5,18 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.espresso.Espresso;
 import android.support.test.espresso.core.deps.guava.collect.Lists;
+import android.support.test.espresso.idling.CountingIdlingResource;
 import android.support.test.runner.AndroidJUnit4;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
+import java.util.Collections;
 import java.util.List;
 
 import co.uk.thejvm.thing.rxtwitter.BaseActivity;
@@ -52,8 +56,7 @@ public class StreamActivityTest {
 
     private static final boolean LAUNCH_ACTIVITY = false;
     private Context context = InstrumentationRegistry.getTargetContext();
-
-    private List<TweetViewModel> tweets = Lists.newArrayList(new TweetViewModel("go reactive or go home", fakeBitmap, "2017.05.11 21:00"));
+    private CountingIdlingResource presenterIdlingResource;
 
     @Rule
     public BaseActivityRule<StreamActivity> activityTestRule =
@@ -83,6 +86,12 @@ public class StreamActivityTest {
             }
         };
 
+    @Before
+    public void setUp() throws Exception {
+        presenterIdlingResource = new CountingIdlingResource("FooServerCalls");
+        Espresso.registerIdlingResources(presenterIdlingResource);
+    }
+
     /**
      * When twee received should render on recycler view.
      */
@@ -100,20 +109,39 @@ public class StreamActivityTest {
     public void whenSearchPerformed_ShouldClearTheTweetsList() {
         ResultRobot resultRobot = new StreamTweetActivityRobot().launchActivity().performSearch().verify();
 
-        resultRobot.checkSizeOfTweetsList(tweets.size());
+        resultRobot.checkSizeOfTweetsList();
         resultRobot.verifyIfReconectedToStreamByNewTerm();
+    }
+
+    @Test
+    public void whenRecyclerViewReceivedMoreTweetsWhenItCanHandle_ShouldClearSpaceToTakeNew() {
+        ResultRobot resultRobot = new StreamTweetActivityRobot().launchActivity(30).performSearch().verify();
+        resultRobot.checkSizeOfTweetsList(StreamActivity.MAX_TWEETS);
+    }
+
+    @Test
+    public void whenActivityPaused_ShouldPausePresenter() {
+        ResultRobot resultRobot = new StreamTweetActivityRobot().launchActivity().goAwayFromActivity().verify();
+        resultRobot.ensurePresenterIsPaused();
     }
 
     private class StreamTweetActivityRobot {
 
+        private List<TweetViewModel> tweets = Collections.EMPTY_LIST;
+
         public ResultRobot verify() {
-            return new ResultRobot();
+            return new ResultRobot(tweets);
         }
 
         public StreamTweetActivityRobot launchActivity() {
+            launchActivity(1);
+            return this;
+        }
+
+        public StreamTweetActivityRobot launchActivity(int numberOfTweets) {
 
             captureView();
-            stubStream();
+            tweets = stubStream(numberOfTweets);
 
             Intent startIntent = new Intent();
             activityTestRule.launchActivity(startIntent);
@@ -128,12 +156,26 @@ public class StreamActivityTest {
             return viewArgumentCaptor.getValue();
         }
 
-        private void stubStream() {
+        private List<TweetViewModel> stubStream(int numberOfTweets) {
+            List<TweetViewModel> tweets = getTweetsList(numberOfTweets);
+
             doAnswer(invocation -> new Handler().postAtFrontOfQueue(() -> {
+                presenterIdlingResource.increment();
                 for (TweetViewModel tweet : tweets) {
                     getTwitterStreamView().renderTweet(tweet);
                 }
+                presenterIdlingResource.decrement();
             })).when(mockTwitterStreamPresenter).connectToStream(any());
+
+            return tweets;
+        }
+
+        private List<TweetViewModel> getTweetsList(int numberOfTweets) {
+            List<TweetViewModel> tweetViewModels = Lists.newArrayList();
+            for (int i = 0; i < numberOfTweets; i++) {
+                tweetViewModels.add(new TweetViewModel("go reactive or go home", fakeBitmap, "2017.05.11 21:00"));
+            }
+            return tweetViewModels;
         }
 
         public StreamTweetActivityRobot performSearch() {
@@ -142,13 +184,19 @@ public class StreamActivityTest {
             return this;
         }
 
-        public StreamTweetActivityRobot pause() {
+        public StreamTweetActivityRobot goAwayFromActivity() {
             activityTestRule.getActivity().onPause();
             return this;
         }
     }
 
     private class ResultRobot {
+
+        private final List<TweetViewModel> tweets;
+
+        public ResultRobot(List<TweetViewModel> tweets) {
+            this.tweets = tweets;
+        }
 
         public void checkIfTweetTextIsVisibleOnScreen() {
             for (TweetViewModel tweet : tweets) {
@@ -162,8 +210,12 @@ public class StreamActivityTest {
             }
         }
 
-        public void checkSizeOfTweetsList(int size) {
-            onView(withId(R.id.live_tweets_list)).check(matches(withRecyclerViewSize(size)));
+        public void checkSizeOfTweetsList() {
+            checkSizeOfTweetsList(tweets.size());
+        }
+
+        public void checkSizeOfTweetsList(int expectedSize) {
+            onView(withId(R.id.live_tweets_list)).check(matches(withRecyclerViewSize(expectedSize)));
         }
 
         public void verifyIfReconectedToStreamByNewTerm() {

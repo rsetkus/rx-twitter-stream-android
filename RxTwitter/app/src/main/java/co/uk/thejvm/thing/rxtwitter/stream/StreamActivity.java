@@ -37,6 +37,7 @@ import co.uk.thejvm.thing.rxtwitter.data.TweetViewModel;
 public class StreamActivity extends BaseActivity implements TwitterStreamView {
 
     private static final String TAG = "StreamActivity";
+    protected static final int MAX_TWEETS = 20;
 
     @Inject
     TwitterStreamPresenter twitterStreamPresenter;
@@ -205,6 +206,8 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
 
     private class TweetsAdapter extends RecyclerView.Adapter<TweetViewHolder> {
 
+        private final int REMOVABLE_TAIL_SIZE = 5;
+
         private List<TweetViewModel> tweets = Lists.newArrayList();
 
         @Override
@@ -224,6 +227,10 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
         }
 
         public void insertNewTweet(TweetViewModel tweet) {
+            if (MAX_TWEETS == tweets.size()) {
+                clearSpace();
+            }
+
             tweets.add(RECENT_TWEET_POSITION, tweet);
             notifyItemInserted(RECENT_TWEET_POSITION);
         }
@@ -231,6 +238,15 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
         public void clear() {
             tweets.clear();
             notifyDataSetChanged();
+        }
+
+        private void clearSpace() {
+            int currentSize = tweets.size();
+            for (int i = currentSize - 1; i >= currentSize - REMOVABLE_TAIL_SIZE; i--) {
+                tweets.remove(i);
+            }
+
+            notifyItemRangeRemoved(currentSize - REMOVABLE_TAIL_SIZE, currentSize - 1);
         }
     }
 
