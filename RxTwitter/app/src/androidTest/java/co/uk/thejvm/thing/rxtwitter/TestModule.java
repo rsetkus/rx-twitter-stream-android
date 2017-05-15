@@ -26,8 +26,8 @@ public class TestModule extends ApplicationModule {
     protected ModuleBootstrapper provideModuleBootstrapper() {
         return new ModuleBootstrapper() {
             @Override
-            public ActivityModule getNewActivityModule(BaseActivity baseActivity) {
-                return getActivityModule(baseActivity, BackPressureStrategy.NO_STRATEGY);
+            public ActivityModule getNewActivityModule(BaseActivity baseActivity, BackPressureStrategy backPressureStrategy) {
+                return getActivityModule(baseActivity, backPressureStrategy);
             }
         };
     }

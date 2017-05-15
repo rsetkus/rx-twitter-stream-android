@@ -17,10 +17,11 @@ import com.google.common.collect.Lists;
 
 import java.util.List;
 
+import co.uk.thejvm.thing.rxtwitter.BaseActivity;
 import co.uk.thejvm.thing.rxtwitter.R;
 import co.uk.thejvm.thing.rxtwitter.common.BackPressureStrategy;
 
-public class BackPressureStrategyActivity extends AppCompatActivity {
+public class BackPressureStrategyActivity extends BaseActivity {
 
     private Toolbar toolbar;
     private RecyclerView backPressureOptions;
@@ -41,6 +42,11 @@ public class BackPressureStrategyActivity extends AppCompatActivity {
 
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
         backPressureOptions.setLayoutManager(mLayoutManager);
+
+    }
+
+    @Override
+    protected void setUpDependencies() {
 
     }
 

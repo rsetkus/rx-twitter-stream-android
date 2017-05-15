@@ -13,6 +13,7 @@ import android.support.test.runner.AndroidJUnit4;
 import com.google.common.base.Function;
 
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,6 +33,7 @@ import co.uk.thejvm.thing.rxtwitter.common.di.ApplicationModule;
 import co.uk.thejvm.thing.rxtwitter.common.util.ExecutionScheduler;
 import co.uk.thejvm.thing.rxtwitter.data.Tweet;
 import co.uk.thejvm.thing.rxtwitter.data.TweetViewModel;
+import co.uk.thejvm.thing.rxtwitter.espresso.DisableAnimationRule;
 import co.uk.thejvm.thing.rxtwitter.tweets.TweetsRepository;
 import co.uk.thejvm.thing.rxtwitter.tweets.TwitterAvatarRepository;
 import io.reactivex.Flowable;
@@ -54,6 +56,9 @@ import static org.mockito.Mockito.verify;
 @RunWith(AndroidJUnit4.class)
 public class StreamActivityTest {
 
+    @ClassRule
+    public static DisableAnimationRule disableAnimationRule = new DisableAnimationRule();
+
     private TwitterStreamPresenter mockTwitterStreamPresenter = mock(TwitterStreamPresenter.class);
     private ArgumentCaptor<TwitterStreamView> viewArgumentCaptor = ArgumentCaptor.forClass(TwitterStreamView.class);
 
@@ -75,9 +80,9 @@ public class StreamActivityTest {
                 return new TestModule(application) {
 
                     @Override
-                    protected ActivityModule getActivityModule(BaseActivity baseActivity) {
+                    protected ActivityModule getActivityModule(BaseActivity baseActivity, BackPressureStrategy backPressureStrategy) {
 
-                        return new ActivityModule(baseActivity, BackPressureStrategy.NO_STRATEGY) {
+                        return new ActivityModule(baseActivity, backPressureStrategy) {
                             @Override
                             public TwitterStreamPresenter provideTwitterStreamPresenter(TweetsRepository repository,
                                                                                         TwitterAvatarRepository avatarRepository,

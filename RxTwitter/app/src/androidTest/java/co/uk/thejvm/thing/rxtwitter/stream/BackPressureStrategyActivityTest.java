@@ -8,15 +8,18 @@ import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import co.uk.thejvm.thing.rxtwitter.BaseActivity;
 import co.uk.thejvm.thing.rxtwitter.BaseActivityRule;
 import co.uk.thejvm.thing.rxtwitter.R;
 import co.uk.thejvm.thing.rxtwitter.RxTwitterApplication;
 import co.uk.thejvm.thing.rxtwitter.TestModule;
 import co.uk.thejvm.thing.rxtwitter.common.BackPressureStrategy;
 import co.uk.thejvm.thing.rxtwitter.common.di.ApplicationModule;
+import co.uk.thejvm.thing.rxtwitter.espresso.DisableAnimationRule;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
@@ -26,6 +29,9 @@ import static android.support.test.espresso.matcher.ViewMatchers.withId;
 
 @RunWith(AndroidJUnit4.class)
 public class BackPressureStrategyActivityTest {
+
+    @ClassRule
+    public static DisableAnimationRule disableAnimationRule = new DisableAnimationRule();
 
     private static final boolean LAUNCH_ACTIVITY = false;
 
@@ -89,7 +95,7 @@ public class BackPressureStrategyActivityTest {
 
     private class ResultRobot {
         public void checkRecordedIntent(BackPressureStrategy strategy) {
-            intended(hasExtra(StreamActivity.BACKPRESSURE_STRATEGY_EXTRA_KEY, strategy));
+            intended(hasExtra(BaseActivity.BACKPRESSURE_STRATEGY_EXTRA_KEY, strategy));
         }
     }
 }

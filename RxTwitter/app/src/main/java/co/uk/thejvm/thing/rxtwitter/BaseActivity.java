@@ -12,7 +12,10 @@ import co.uk.thejvm.thing.rxtwitter.common.di.DaggerActivityComponent;
 
 public abstract class BaseActivity extends AppCompatActivity {
 
-    protected static final String BACKPRESSURE_STRATEGY_EXTRA_KEY = "backpressure_strategy_option";
+    /**
+     * The constant BACKPRESSURE_STRATEGY_EXTRA_KEY.
+     */
+    public static final String BACKPRESSURE_STRATEGY_EXTRA_KEY = "backpressure_strategy_option";
 
     private ActivityComponent activityComponent;
     private BackPressureStrategy backPressureStrategy = BackPressureStrategy.NO_STRATEGY;
