@@ -48,7 +48,7 @@ public class TwitterStreamPresenterTest {
     @Before
     public void setUp() {
         twitterStreamPresenter = new TwitterStreamPresenter(mockTweetsRepository, mockTwitterAvatarRepository,
-            testExecutionScheduler, testExecutionScheduler);
+            testExecutionScheduler, testExecutionScheduler, testExecutionScheduler);
         twitterStreamPresenter.setView(mockTwitterStreamView);
     }
 
