@@ -14,7 +14,7 @@ public class SimpleTwitterMapper implements TwitterMapper {
 
     @Override
     public Tweet from(Status status) {
-        return new Tweet(status.getText(), formatDate(status.getCreatedAt()), status.getUser().getOriginalProfileImageURL());
+        return new Tweet(status.getText(), formatDate(status.getCreatedAt()), status.getUser().getProfileImageURL(), status.getUser().getName());
     }
 
     private String formatDate(Date date) {

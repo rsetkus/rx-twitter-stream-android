@@ -173,7 +173,7 @@ public class StreamActivityTest {
         private List<TweetViewModel> getTweetsList(int numberOfTweets) {
             List<TweetViewModel> tweetViewModels = Lists.newArrayList();
             for (int i = 0; i < numberOfTweets; i++) {
-                tweetViewModels.add(new TweetViewModel("go reactive or go home", fakeBitmap, "2017.05.11 21:00"));
+                tweetViewModels.add(new TweetViewModel("go reactive or go home", fakeBitmap, "2017.05.11 21:00", "John Doe"));
             }
             return tweetViewModels;
         }

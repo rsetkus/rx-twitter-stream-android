@@ -55,7 +55,7 @@ public class TwitterStreamPresenterTest {
     @Test
     public void whenConnectedToStreamShouldRenderTweet() {
         List<String> terms = Lists.newArrayList("rxjava");
-        when(mockTweetsRepository.getTweets(terms)).thenReturn(just(new Tweet("#android-rxjava", "2017.05.11 21:55", imageUri)));
+        when(mockTweetsRepository.getTweets(terms)).thenReturn(just(new Tweet("#android-rxjava", "2017.05.11 21:55", imageUri, "John Doe")));
         when(mockTwitterAvatarRepository.getAvatar(imageUri)).thenReturn(just(mockBitmap));
         twitterStreamPresenter.connectToStream(terms);
 

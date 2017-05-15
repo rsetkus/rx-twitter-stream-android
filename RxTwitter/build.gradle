@@ -19,6 +19,7 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
+        maven { url 'https://jitpack.io' }
     }
 }
 
@@ -43,4 +44,5 @@ ext {
     dexmakerVersion = '1.2'
     twitter4jVersion = '4.0.4'
     univerImageLoaderVersion = '1.9.5'
+    circleimageviewVersion = '2.1.0'
 }

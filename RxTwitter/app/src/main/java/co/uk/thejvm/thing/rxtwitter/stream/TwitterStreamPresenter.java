@@ -1,5 +1,7 @@
 package co.uk.thejvm.thing.rxtwitter.stream;
 
+import android.util.Log;
+
 import java.util.List;
 
 import co.uk.thejvm.thing.rxtwitter.common.BasePresenter;
@@ -16,6 +18,8 @@ import static io.reactivex.Flowable.zip;
 
 public class TwitterStreamPresenter implements BasePresenter<TwitterStreamView> {
 
+    private static final String TAG = "TwitterStreamPresenter";
+
     private TwitterStreamView twitterStreamView;
     private final TweetsRepository tweetsRepository;
     private final TwitterAvatarRepository avatarRepository;
@@ -31,13 +35,13 @@ public class TwitterStreamPresenter implements BasePresenter<TwitterStreamView> 
     }
 
     public void connectToStream(List<String> terms) {
-
+        twitterStreamView.showLoading();
         tweetsRepository.getTweets(terms)
             .subscribeOn(ioThread.getScheduler())
             .flatMap(rawTweet ->
                 zip(
                     just(rawTweet), avatarRepository.getAvatar(rawTweet.getImageUri()),
-                    (tweet, bitmap) -> new TweetViewModel(tweet.getContent(), bitmap, tweet.getDateLabel())
+                    (tweet, bitmap) -> new TweetViewModel(tweet.getContent(), bitmap, tweet.getDateLabel(), tweet.getUserName())
                 )
             )
             .observeOn(uiThread.getScheduler())
@@ -71,11 +75,14 @@ public class TwitterStreamPresenter implements BasePresenter<TwitterStreamView> 
 
         @Override
         public void onError(@NonNull Throwable e) {
-            // view.deadBird();
+            Log.e(TAG, e.toString());
+            twitterStreamView.hideLoading();
+            twitterStreamView.showError();
         }
 
         @Override
         public void onComplete() {
+            twitterStreamView.hideLoading();
         }
     }
 }
