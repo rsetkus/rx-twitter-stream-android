@@ -2,6 +2,7 @@ package co.uk.thejvm.thing.rxtwitter;
 
 import android.app.Application;
 
+import co.uk.thejvm.thing.rxtwitter.common.BackPressureStrategy;
 import co.uk.thejvm.thing.rxtwitter.common.di.ActivityModule;
 import co.uk.thejvm.thing.rxtwitter.common.di.ApplicationModule;
 import co.uk.thejvm.thing.rxtwitter.common.di.ModuleBootstrapper;
@@ -26,13 +27,13 @@ public class TestModule extends ApplicationModule {
         return new ModuleBootstrapper() {
             @Override
             public ActivityModule getNewActivityModule(BaseActivity baseActivity) {
-                return getActivityModule(baseActivity);
+                return getActivityModule(baseActivity, BackPressureStrategy.NO_STRATEGY);
             }
         };
     }
 
-    protected ActivityModule getActivityModule(BaseActivity baseActivity) {
-        return new ActivityModule(baseActivity);
+    protected ActivityModule getActivityModule(BaseActivity baseActivity, BackPressureStrategy strategy) {
+        return new ActivityModule(baseActivity, strategy);
     }
 
     @Override

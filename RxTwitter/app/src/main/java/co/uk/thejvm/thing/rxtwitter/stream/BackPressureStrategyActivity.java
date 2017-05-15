@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -16,11 +17,10 @@ import com.google.common.collect.Lists;
 
 import java.util.List;
 
-import co.uk.thejvm.thing.rxtwitter.BaseActivity;
 import co.uk.thejvm.thing.rxtwitter.R;
 import co.uk.thejvm.thing.rxtwitter.common.BackPressureStrategy;
 
-public class BackPressureStrategyActivity extends BaseActivity {
+public class BackPressureStrategyActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
     private RecyclerView backPressureOptions;
@@ -41,11 +41,6 @@ public class BackPressureStrategyActivity extends BaseActivity {
 
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
         backPressureOptions.setLayoutManager(mLayoutManager);
-
-    }
-
-    @Override
-    protected void setUpDependencies() {
 
     }
 

@@ -10,6 +10,8 @@ import android.support.test.espresso.core.deps.guava.collect.Lists;
 import android.support.test.espresso.idling.CountingIdlingResource;
 import android.support.test.runner.AndroidJUnit4;
 
+import com.google.common.base.Function;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -24,12 +26,15 @@ import co.uk.thejvm.thing.rxtwitter.BaseActivityRule;
 import co.uk.thejvm.thing.rxtwitter.R;
 import co.uk.thejvm.thing.rxtwitter.RxTwitterApplication;
 import co.uk.thejvm.thing.rxtwitter.TestModule;
+import co.uk.thejvm.thing.rxtwitter.common.BackPressureStrategy;
 import co.uk.thejvm.thing.rxtwitter.common.di.ActivityModule;
 import co.uk.thejvm.thing.rxtwitter.common.di.ApplicationModule;
 import co.uk.thejvm.thing.rxtwitter.common.util.ExecutionScheduler;
+import co.uk.thejvm.thing.rxtwitter.data.Tweet;
 import co.uk.thejvm.thing.rxtwitter.data.TweetViewModel;
 import co.uk.thejvm.thing.rxtwitter.tweets.TweetsRepository;
 import co.uk.thejvm.thing.rxtwitter.tweets.TwitterAvatarRepository;
+import io.reactivex.Flowable;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
@@ -72,12 +77,13 @@ public class StreamActivityTest {
                     @Override
                     protected ActivityModule getActivityModule(BaseActivity baseActivity) {
 
-                        return new ActivityModule(baseActivity) {
+                        return new ActivityModule(baseActivity, BackPressureStrategy.NO_STRATEGY) {
                             @Override
                             public TwitterStreamPresenter provideTwitterStreamPresenter(TweetsRepository repository,
                                                                                         TwitterAvatarRepository avatarRepository,
                                                                                         ExecutionScheduler uiScheduler,
-                                                                                        ExecutionScheduler ioScheduler) {
+                                                                                        ExecutionScheduler ioScheduler,
+                                                                                        Function<Flowable<Tweet>, Flowable<Tweet>> backPressureStrategyFunction) {
                                 return mockTwitterStreamPresenter;
                             }
                         };

@@ -2,15 +2,21 @@ package co.uk.thejvm.thing.rxtwitter.stream;
 
 import android.util.Log;
 
+import com.google.common.base.Function;
+
 import java.util.List;
 
 import co.uk.thejvm.thing.rxtwitter.common.BasePresenter;
 import co.uk.thejvm.thing.rxtwitter.common.util.ExecutionScheduler;
+import co.uk.thejvm.thing.rxtwitter.data.Tweet;
 import co.uk.thejvm.thing.rxtwitter.data.TweetViewModel;
 import co.uk.thejvm.thing.rxtwitter.tweets.TweetsRepository;
 import co.uk.thejvm.thing.rxtwitter.tweets.TwitterAvatarRepository;
+import io.reactivex.BackpressureOverflowStrategy;
+import io.reactivex.Flowable;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subscribers.DisposableSubscriber;
 
 import static io.reactivex.Flowable.just;
@@ -25,19 +31,24 @@ public class TwitterStreamPresenter implements BasePresenter<TwitterStreamView> 
     private final TwitterAvatarRepository avatarRepository;
     private final ExecutionScheduler uiThread, ioThread;
     private CompositeDisposable disposable = new CompositeDisposable();
+    private final Function<Flowable<Tweet>, Flowable<Tweet>> backPressureStrategyFunction;
 
     public TwitterStreamPresenter(TweetsRepository tweetsRepository, TwitterAvatarRepository avatarRepository,
-                                  ExecutionScheduler uiThread, ExecutionScheduler ioThread) {
+                                  ExecutionScheduler uiThread, ExecutionScheduler ioThread,
+                                  Function<Flowable<Tweet>, Flowable<Tweet>> backPressureStrategyFunction) {
         this.tweetsRepository = tweetsRepository;
         this.avatarRepository = avatarRepository;
         this.uiThread = uiThread;
         this.ioThread = ioThread;
+        this.backPressureStrategyFunction = backPressureStrategyFunction;
     }
 
     public void connectToStream(List<String> terms) {
         twitterStreamView.showLoading();
-        tweetsRepository.getTweets(terms)
+
+        backPressureStrategyFunction.apply(tweetsRepository.getTweets(terms))
             .subscribeOn(ioThread.getScheduler())
+            .observeOn(Schedulers.computation())
             .flatMap(rawTweet ->
                 zip(
                     just(rawTweet), avatarRepository.getAvatar(rawTweet.getImageUri()),

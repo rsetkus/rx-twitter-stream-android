@@ -39,12 +39,12 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class StreamActivity extends BaseActivity implements TwitterStreamView {
 
     private static final String TAG = "StreamActivity";
-    protected static final int MAX_TWEETS = 20;
 
     @Inject
     TwitterStreamPresenter twitterStreamPresenter;
 
-    static final String BACKPRESSURE_STRATEGY_EXTRA_KEY = "backpressure_strategy_option";
+    protected static final int MAX_TWEETS = 20;
+
     private Toolbar toolbar;
     private boolean isSearchOpened = false;
     private MenuItem mSearchAction;
@@ -54,7 +54,6 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
     private MultiStateView multiStateView;
 
     private TweetsAdapter tweetsAdapter = new TweetsAdapter();
-    private BackPressureStrategy backPressureStrategy = BackPressureStrategy.NO_STRATEGY;
 
     private static final int RECENT_TWEET_POSITION = 0;
 
@@ -74,11 +73,6 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
         liveTweets.setAdapter(tweetsAdapter);
 
         twitterStreamPresenter.setView(this);
-
-        Intent intent = getIntent();
-        if (intent.hasExtra(BACKPRESSURE_STRATEGY_EXTRA_KEY)) {
-            backPressureStrategy = (BackPressureStrategy) intent.getSerializableExtra(BACKPRESSURE_STRATEGY_EXTRA_KEY);
-        }
     }
 
     @Override
@@ -215,7 +209,7 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
 
     public static Intent createIntent(Context context, BackPressureStrategy strategy) {
         Intent intent = new Intent(context, StreamActivity.class);
-        intent.putExtra(BACKPRESSURE_STRATEGY_EXTRA_KEY, strategy);
+        intent.putExtra(BaseActivity.BACKPRESSURE_STRATEGY_EXTRA_KEY, strategy);
         return intent;
     }
 
