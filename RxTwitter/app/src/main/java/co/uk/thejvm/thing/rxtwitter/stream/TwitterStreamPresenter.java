@@ -19,21 +19,23 @@ public class TwitterStreamPresenter implements BasePresenter<TwitterStreamView> 
     private TwitterStreamView twitterStreamView;
     private final TweetsRepository tweetsRepository;
     private final TwitterAvatarRepository avatarRepository;
-    private final ExecutionScheduler uiThread, ioThread;
+    private final ExecutionScheduler uiThread, tweetIoThread, imageIoThread;
     private CompositeDisposable disposable = new CompositeDisposable();
 
     public TwitterStreamPresenter(TweetsRepository tweetsRepository, TwitterAvatarRepository avatarRepository,
-                                  ExecutionScheduler uiThread, ExecutionScheduler ioThread) {
+                                  ExecutionScheduler uiThread, ExecutionScheduler tweetIoThread, ExecutionScheduler imageIoThread) {
         this.tweetsRepository = tweetsRepository;
         this.avatarRepository = avatarRepository;
         this.uiThread = uiThread;
-        this.ioThread = ioThread;
+        this.tweetIoThread = tweetIoThread;
+        this.imageIoThread = imageIoThread;
     }
 
     public void connectToStream(List<String> terms) {
 
         tweetsRepository.getTweets(terms)
-            .subscribeOn(ioThread.getScheduler())
+            .subscribeOn(tweetIoThread.getScheduler())
+            .observeOn(imageIoThread.getScheduler())
             .flatMap(rawTweet ->
                 zip(
                     just(rawTweet), avatarRepository.getAvatar(rawTweet.getImageUri()),
