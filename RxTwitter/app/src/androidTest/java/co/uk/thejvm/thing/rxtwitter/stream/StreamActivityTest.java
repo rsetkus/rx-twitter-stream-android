@@ -77,7 +77,8 @@ public class StreamActivityTest {
                             public TwitterStreamPresenter provideTwitterStreamPresenter(TweetsRepository repository,
                                                                                         TwitterAvatarRepository avatarRepository,
                                                                                         ExecutionScheduler uiScheduler,
-                                                                                        ExecutionScheduler ioScheduler) {
+                                                                                        ExecutionScheduler tweetScheduler,
+                                                                                        ExecutionScheduler imageScheduler) {
                                 return mockTwitterStreamPresenter;
                             }
                         };
