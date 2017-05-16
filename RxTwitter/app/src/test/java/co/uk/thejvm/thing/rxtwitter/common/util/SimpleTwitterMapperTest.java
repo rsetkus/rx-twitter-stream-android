@@ -40,6 +40,7 @@ public class SimpleTwitterMapperTest {
 
     private static final String TWEET_TEXT = "GO REACTIVE OR GO HOME";
     private static final Status FAKE_STATUS = new FakeStatus();
+    private static final String EXPECTED_USER_NAME = "John Doe";
     private static final String EXPECTED_DATE_LABEL = "2017.05.11 21:55:11";
     private static final String EXPECTED_IMAGE_URI = "http://twitter/image.jpg";
 
@@ -47,8 +48,9 @@ public class SimpleTwitterMapperTest {
 
     @Before
     public void setUp() {
-        when(user.getOriginalProfileImageURL()).thenReturn(EXPECTED_IMAGE_URI);
-        expectedTweet = new Tweet(TWEET_TEXT, EXPECTED_DATE_LABEL, EXPECTED_IMAGE_URI);
+        when(user.getProfileImageURL()).thenReturn(EXPECTED_IMAGE_URI);
+        when(user.getName()).thenReturn(EXPECTED_USER_NAME);
+        expectedTweet = new Tweet(TWEET_TEXT, EXPECTED_DATE_LABEL, EXPECTED_IMAGE_URI, EXPECTED_USER_NAME);
         simpleTwitterMapper = new SimpleTwitterMapper();
     }
 

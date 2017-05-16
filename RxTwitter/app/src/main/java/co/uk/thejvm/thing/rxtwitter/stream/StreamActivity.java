@@ -24,6 +24,7 @@ import android.widget.TextView;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.kennyc.view.MultiStateView;
 
 import java.util.List;
 
@@ -33,25 +34,26 @@ import co.uk.thejvm.thing.rxtwitter.BaseActivity;
 import co.uk.thejvm.thing.rxtwitter.R;
 import co.uk.thejvm.thing.rxtwitter.common.BackPressureStrategy;
 import co.uk.thejvm.thing.rxtwitter.data.TweetViewModel;
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class StreamActivity extends BaseActivity implements TwitterStreamView {
 
     private static final String TAG = "StreamActivity";
-    protected static final int MAX_TWEETS = 20;
 
     @Inject
     TwitterStreamPresenter twitterStreamPresenter;
 
-    static final String BACKPRESSURE_STRATEGY_EXTRA_KEY = "backpressure_strategy_option";
+    protected static final int MAX_TWEETS = 20;
+
     private Toolbar toolbar;
     private boolean isSearchOpened = false;
     private MenuItem mSearchAction;
 
     private EditText termsSearch;
     private RecyclerView liveTweets;
+    private MultiStateView multiStateView;
 
     private TweetsAdapter tweetsAdapter = new TweetsAdapter();
-    private BackPressureStrategy backPressureStrategy = BackPressureStrategy.NO_STRATEGY;
 
     private static final int RECENT_TWEET_POSITION = 0;
 
@@ -71,11 +73,6 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
         liveTweets.setAdapter(tweetsAdapter);
 
         twitterStreamPresenter.setView(this);
-
-        Intent intent = getIntent();
-        if (intent.hasExtra(BACKPRESSURE_STRATEGY_EXTRA_KEY)) {
-            backPressureStrategy = (BackPressureStrategy) intent.getSerializableExtra(BACKPRESSURE_STRATEGY_EXTRA_KEY);
-        }
     }
 
     @Override
@@ -115,16 +112,25 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
 
     @Override
     public void showLoading() {
-
+        multiStateView.setViewState(MultiStateView.VIEW_STATE_LOADING);
     }
 
     @Override
     public void hideLoading() {
+        multiStateView.setViewState(MultiStateView.VIEW_STATE_CONTENT);
+    }
 
+    @Override
+    public void showError() {
+        multiStateView.setViewState(MultiStateView.VIEW_STATE_ERROR);
     }
 
     @Override
     public void renderTweet(TweetViewModel tweet) {
+        if (MultiStateView.VIEW_STATE_CONTENT != multiStateView.getViewState()) {
+            multiStateView.setViewState(MultiStateView.VIEW_STATE_CONTENT);
+        }
+
         tweetsAdapter.insertNewTweet(tweet);
         liveTweets.smoothScrollToPosition(RECENT_TWEET_POSITION);
     }
@@ -190,17 +196,20 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
         setContentView(R.layout.activity_stream);
 
         liveTweets = (RecyclerView) findViewById(R.id.live_tweets_list);
+        multiStateView = (MultiStateView) findViewById(R.id.multi_state_view);
         termsSearch = (EditText) findViewById(R.id.terms_search);
         toolbar = (Toolbar) findViewById(R.id.rx_twitter_toolbar);
         setSupportActionBar(toolbar);
 
         toolbar.setTitleTextColor(Color.WHITE);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        multiStateView.setViewState(MultiStateView.VIEW_STATE_EMPTY);
     }
 
     public static Intent createIntent(Context context, BackPressureStrategy strategy) {
         Intent intent = new Intent(context, StreamActivity.class);
-        intent.putExtra(BACKPRESSURE_STRATEGY_EXTRA_KEY, strategy);
+        intent.putExtra(BaseActivity.BACKPRESSURE_STRATEGY_EXTRA_KEY, strategy);
         return intent;
     }
 
@@ -252,6 +261,7 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
 
     private class TweetViewHolder extends RecyclerView.ViewHolder {
 
+        private TextView tweetUserName;
         private TextView tweetContent;
         private TextView tweetCreatedDateLabel;
         private ImageView avatar;
@@ -259,14 +269,16 @@ public class StreamActivity extends BaseActivity implements TwitterStreamView {
         public TweetViewHolder(View itemView) {
             super(itemView);
 
+            tweetUserName = (TextView) itemView.findViewById(R.id.tweet_user_name);
             tweetContent = (TextView) itemView.findViewById(R.id.tweet_content);
             tweetCreatedDateLabel = (TextView) itemView.findViewById(R.id.tweet_created_date_label);
-            avatar = (ImageView) itemView.findViewById(R.id.profile_avatar);
+            avatar = (CircleImageView) itemView.findViewById(R.id.profile_avatar);
         }
 
         public void setTweet(TweetViewModel tweet) {
             tweetContent.setText(tweet.getContent());
             tweetCreatedDateLabel.setText(tweet.getDateLabel());
+            tweetUserName.setText(tweet.getUserName());
 
             Optional<Bitmap> bitmapOptional = Optional.fromNullable(tweet.getAvatarImage());
             if (bitmapOptional.isPresent()) {

@@ -5,4 +5,6 @@ import android.graphics.Bitmap
 data class TweetViewModel (
     val content: String,
     var avatarImage: Bitmap,
-    val dateLabel: String = "")
+    val dateLabel: String = "",
+    val userName: String = ""
+)

@@ -10,7 +10,10 @@ import android.support.test.espresso.core.deps.guava.collect.Lists;
 import android.support.test.espresso.idling.CountingIdlingResource;
 import android.support.test.runner.AndroidJUnit4;
 
+import com.google.common.base.Function;
+
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,12 +27,16 @@ import co.uk.thejvm.thing.rxtwitter.BaseActivityRule;
 import co.uk.thejvm.thing.rxtwitter.R;
 import co.uk.thejvm.thing.rxtwitter.RxTwitterApplication;
 import co.uk.thejvm.thing.rxtwitter.TestModule;
+import co.uk.thejvm.thing.rxtwitter.common.BackPressureStrategy;
 import co.uk.thejvm.thing.rxtwitter.common.di.ActivityModule;
 import co.uk.thejvm.thing.rxtwitter.common.di.ApplicationModule;
 import co.uk.thejvm.thing.rxtwitter.common.util.ExecutionScheduler;
+import co.uk.thejvm.thing.rxtwitter.data.Tweet;
 import co.uk.thejvm.thing.rxtwitter.data.TweetViewModel;
+import co.uk.thejvm.thing.rxtwitter.espresso.DisableAnimationRule;
 import co.uk.thejvm.thing.rxtwitter.tweets.TweetsRepository;
 import co.uk.thejvm.thing.rxtwitter.tweets.TwitterAvatarRepository;
+import io.reactivex.Flowable;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
@@ -48,6 +55,9 @@ import static org.mockito.Mockito.verify;
 
 @RunWith(AndroidJUnit4.class)
 public class StreamActivityTest {
+
+    @ClassRule
+    public static DisableAnimationRule disableAnimationRule = new DisableAnimationRule();
 
     private TwitterStreamPresenter mockTwitterStreamPresenter = mock(TwitterStreamPresenter.class);
     private ArgumentCaptor<TwitterStreamView> viewArgumentCaptor = ArgumentCaptor.forClass(TwitterStreamView.class);
@@ -70,15 +80,16 @@ public class StreamActivityTest {
                 return new TestModule(application) {
 
                     @Override
-                    protected ActivityModule getActivityModule(BaseActivity baseActivity) {
+                    protected ActivityModule getActivityModule(BaseActivity baseActivity, BackPressureStrategy backPressureStrategy) {
 
-                        return new ActivityModule(baseActivity) {
+                        return new ActivityModule(baseActivity, backPressureStrategy) {
                             @Override
                             public TwitterStreamPresenter provideTwitterStreamPresenter(TweetsRepository repository,
                                                                                         TwitterAvatarRepository avatarRepository,
                                                                                         ExecutionScheduler uiScheduler,
                                                                                         ExecutionScheduler tweetScheduler,
-                                                                                        ExecutionScheduler imageScheduler) {
+                                                                                        ExecutionScheduler imageScheduler,
+                                                                                        Function<Flowable<Tweet>, Flowable<Tweet>> backPressureStrategyFunction) {
                                 return mockTwitterStreamPresenter;
                             }
                         };
@@ -174,7 +185,7 @@ public class StreamActivityTest {
         private List<TweetViewModel> getTweetsList(int numberOfTweets) {
             List<TweetViewModel> tweetViewModels = Lists.newArrayList();
             for (int i = 0; i < numberOfTweets; i++) {
-                tweetViewModels.add(new TweetViewModel("go reactive or go home", fakeBitmap, "2017.05.11 21:00"));
+                tweetViewModels.add(new TweetViewModel("go reactive or go home", fakeBitmap, "2017.05.11 21:00", "John Doe"));
             }
             return tweetViewModels;
         }

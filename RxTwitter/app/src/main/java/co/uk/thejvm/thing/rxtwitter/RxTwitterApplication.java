@@ -53,7 +53,7 @@ public class RxTwitterApplication extends Application {
                 .diskCache(new UnlimitedDiskCache(cacheDir)) // default
                 .diskCacheSize(50 * 1024 * 1024)
                 .diskCacheFileCount(100)
-                .writeDebugLogs()
+//                .writeDebugLogs()
                 .build();
 
         ImageLoader.getInstance().init(config);

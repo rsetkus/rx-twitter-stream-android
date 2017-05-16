@@ -14,6 +14,11 @@ public class ImageLoaderTwitterAvatarRepository implements TwitterAvatarReposito
     @Override
     public Flowable<Bitmap> getAvatar(String imageUri) {
         return Flowable.create(e -> {
+            try {
+                Thread.sleep(100);
+            } catch (Exception exception) {
+
+            }
             AvatarListener listener = new AvatarListener(e);
             imgLoader.loadImage(imageUri, listener);
             // https://github.com/nostra13/Android-Universal-Image-Loader/issues/586
