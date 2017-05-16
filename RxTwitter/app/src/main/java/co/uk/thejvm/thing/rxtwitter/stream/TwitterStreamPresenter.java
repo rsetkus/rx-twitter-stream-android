@@ -28,18 +28,20 @@ public class TwitterStreamPresenter implements BasePresenter<TwitterStreamView> 
     private TwitterStreamView twitterStreamView;
     private final TweetsRepository tweetsRepository;
     private final TwitterAvatarRepository avatarRepository;
-    private final ExecutionScheduler uiThread, ioThread;
+    private final ExecutionScheduler uiThread, tweetIoThread, imageIoThread;
     private CompositeDisposable disposable = new CompositeDisposable();
     private final Function<Flowable<Tweet>, Flowable<Tweet>> backPressureStrategyFunction;
 
     public TwitterStreamPresenter(TweetsRepository tweetsRepository, TwitterAvatarRepository avatarRepository,
+                                  ExecutionScheduler uiThread, ExecutionScheduler tweetIoThread, ExecutionScheduler imageIoThread) {
                                   ExecutionScheduler uiThread, ExecutionScheduler ioThread,
                                   Function<Flowable<Tweet>, Flowable<Tweet>> backPressureStrategyFunction) {
         this.tweetsRepository = tweetsRepository;
         this.avatarRepository = avatarRepository;
         this.uiThread = uiThread;
-        this.ioThread = ioThread;
         this.backPressureStrategyFunction = backPressureStrategyFunction;
+        this.tweetIoThread = tweetIoThread;
+        this.imageIoThread = imageIoThread;
     }
 
     public void connectToStream(List<String> terms) {
@@ -48,6 +50,9 @@ public class TwitterStreamPresenter implements BasePresenter<TwitterStreamView> 
         backPressureStrategyFunction.apply(tweetsRepository.getTweets(terms))
             .subscribeOn(ioThread.getScheduler())
             .observeOn(Schedulers.computation())
+        tweetsRepository.getTweets(terms)
+            .subscribeOn(tweetIoThread.getScheduler())
+            .observeOn(imageIoThread.getScheduler())
             .flatMap(rawTweet ->
                 zip(
                     just(rawTweet), avatarRepository.getAvatar(rawTweet.getImageUri()),

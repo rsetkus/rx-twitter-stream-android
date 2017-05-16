@@ -9,7 +9,7 @@ import javax.inject.Named;
 import co.uk.thejvm.thing.rxtwitter.BaseActivity;
 import co.uk.thejvm.thing.rxtwitter.common.BackPressureStrategy;
 import co.uk.thejvm.thing.rxtwitter.common.util.ExecutionScheduler;
-import co.uk.thejvm.thing.rxtwitter.common.util.IOScheduler;
+import co.uk.thejvm.thing.rxtwitter.common.util.TweetIOScheduler;
 import co.uk.thejvm.thing.rxtwitter.common.util.SimpleTwitterMapper;
 import co.uk.thejvm.thing.rxtwitter.common.util.TwitterMapper;
 import co.uk.thejvm.thing.rxtwitter.common.util.UIScheduler;
@@ -61,9 +61,15 @@ public class ActivityModule {
     }
 
     @ActivityScope
-    @Provides @Named("io")
-    public ExecutionScheduler getIoExecutionScheduler() {
-        return new IOScheduler();
+    @Provides @Named("tweetio")
+    public ExecutionScheduler getTweetIoExecutionScheduler() {
+        return new TweetIOScheduler();
+    }
+
+    @ActivityScope
+    @Provides @Named("imageio")
+    public ExecutionScheduler getImageIoExecutionScheduler() {
+        return new TweetIOScheduler();
     }
 
     @ActivityScope
@@ -71,10 +77,11 @@ public class ActivityModule {
     public TwitterStreamPresenter provideTwitterStreamPresenter(TweetsRepository repository,
                                                                 TwitterAvatarRepository avatarRepository,
                                                                 @Named("ui") ExecutionScheduler uiScheduler,
-                                                                @Named("io") ExecutionScheduler ioScheduler,
+                                                                @Named("tweetio") ExecutionScheduler tweetIoScheduler,
+                                                                @Named("imageio") ExecutionScheduler imageIoScheduler,
                                                                 Function<Flowable<Tweet>, Flowable<Tweet>> function) {
 
-        return new TwitterStreamPresenter(repository, avatarRepository, uiScheduler, ioScheduler, function);
+        return new TwitterStreamPresenter(repository, avatarRepository, uiScheduler, tweetIoScheduler, imageIoScheduler, function);
     }
 
     @ActivityScope
@@ -98,4 +105,5 @@ public class ActivityModule {
 
         return backPressureStrategyFunction;
     }
+
 }

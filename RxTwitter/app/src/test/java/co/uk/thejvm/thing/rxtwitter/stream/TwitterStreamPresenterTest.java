@@ -47,6 +47,7 @@ public class TwitterStreamPresenterTest {
     public void setUp() {
         when(mockBackPressureStrategyFunction.apply(any(Flowable.class))).thenReturn(dummyFlowable);
         twitterStreamPresenter = new TwitterStreamPresenter(mockTweetsRepository, mockTwitterAvatarRepository,
+            testExecutionScheduler, testExecutionScheduler, testExecutionScheduler);
             testExecutionScheduler, testExecutionScheduler, mockBackPressureStrategyFunction);
         twitterStreamPresenter.setView(mockTwitterStreamView);
     }
