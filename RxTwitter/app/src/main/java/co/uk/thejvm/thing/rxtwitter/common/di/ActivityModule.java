@@ -9,6 +9,7 @@ import javax.inject.Named;
 import co.uk.thejvm.thing.rxtwitter.BaseActivity;
 import co.uk.thejvm.thing.rxtwitter.common.BackPressureStrategy;
 import co.uk.thejvm.thing.rxtwitter.common.util.ExecutionScheduler;
+import co.uk.thejvm.thing.rxtwitter.common.util.ImageIoScheduler;
 import co.uk.thejvm.thing.rxtwitter.common.util.TweetIOScheduler;
 import co.uk.thejvm.thing.rxtwitter.common.util.SimpleTwitterMapper;
 import co.uk.thejvm.thing.rxtwitter.common.util.TwitterMapper;
@@ -69,7 +70,7 @@ public class ActivityModule {
     @ActivityScope
     @Provides @Named("imageio")
     public ExecutionScheduler getImageIoExecutionScheduler() {
-        return new TweetIOScheduler();
+        return new ImageIoScheduler();
     }
 
     @ActivityScope

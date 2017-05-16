@@ -88,8 +88,7 @@ public class StreamActivityTest {
                                                                                         TwitterAvatarRepository avatarRepository,
                                                                                         ExecutionScheduler uiScheduler,
                                                                                         ExecutionScheduler tweetScheduler,
-                                                                                        ExecutionScheduler imageScheduler) {
-                                                                                        ExecutionScheduler ioScheduler,
+                                                                                        ExecutionScheduler imageScheduler,
                                                                                         Function<Flowable<Tweet>, Flowable<Tweet>> backPressureStrategyFunction) {
                                 return mockTwitterStreamPresenter;
                             }

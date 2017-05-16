@@ -15,7 +15,6 @@ import co.uk.thejvm.thing.rxtwitter.tweets.TwitterAvatarRepository;
 import io.reactivex.Flowable;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subscribers.DisposableSubscriber;
 
 import static io.reactivex.Flowable.just;
@@ -28,38 +27,36 @@ public class TwitterStreamPresenter implements BasePresenter<TwitterStreamView> 
     private TwitterStreamView twitterStreamView;
     private final TweetsRepository tweetsRepository;
     private final TwitterAvatarRepository avatarRepository;
-    private final ExecutionScheduler uiThread, tweetIoThread, imageIoThread;
+    private final ExecutionScheduler uiScheduler, tweetIo, imageIo;
     private CompositeDisposable disposable = new CompositeDisposable();
     private final Function<Flowable<Tweet>, Flowable<Tweet>> backPressureStrategyFunction;
 
     public TwitterStreamPresenter(TweetsRepository tweetsRepository, TwitterAvatarRepository avatarRepository,
-                                  ExecutionScheduler uiThread, ExecutionScheduler tweetIoThread, ExecutionScheduler imageIoThread) {
-                                  ExecutionScheduler uiThread, ExecutionScheduler ioThread,
+                                  ExecutionScheduler uiScheduler, ExecutionScheduler tweetIo, ExecutionScheduler imageIo,
                                   Function<Flowable<Tweet>, Flowable<Tweet>> backPressureStrategyFunction) {
+
+
         this.tweetsRepository = tweetsRepository;
         this.avatarRepository = avatarRepository;
-        this.uiThread = uiThread;
+        this.uiScheduler = uiScheduler;
         this.backPressureStrategyFunction = backPressureStrategyFunction;
-        this.tweetIoThread = tweetIoThread;
-        this.imageIoThread = imageIoThread;
+        this.tweetIo = tweetIo;
+        this.imageIo = imageIo;
     }
 
     public void connectToStream(List<String> terms) {
         twitterStreamView.showLoading();
 
         backPressureStrategyFunction.apply(tweetsRepository.getTweets(terms))
-            .subscribeOn(ioThread.getScheduler())
-            .observeOn(Schedulers.computation())
-        tweetsRepository.getTweets(terms)
-            .subscribeOn(tweetIoThread.getScheduler())
-            .observeOn(imageIoThread.getScheduler())
+            .subscribeOn(tweetIo.getScheduler())
+            .observeOn(imageIo.getScheduler())
             .flatMap(rawTweet ->
                 zip(
                     just(rawTweet), avatarRepository.getAvatar(rawTweet.getImageUri()),
                     (tweet, bitmap) -> new TweetViewModel(tweet.getContent(), bitmap, tweet.getDateLabel(), tweet.getUserName())
                 )
             )
-            .observeOn(uiThread.getScheduler())
+            .observeOn(uiScheduler.getScheduler())
             .subscribe(new TweetStreamSubcriber());
     }
 
